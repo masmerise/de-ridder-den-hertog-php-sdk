@@ -1,0 +1,53 @@
+{
+    "name": "masmerise/de-ridder-den-hertog-php-sdk",
+    "description": "An unofficial PHP SDK for accessing De Ridder & Den Hertog's API.",
+    "license": "MIT",
+    "keywords": [
+        "ridder",
+        "hertog",
+        "renh",
+        "api",
+        "sdk"
+    ],
+    "authors": [
+        {
+            "name": "Muhammed Sari",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://github.com/masmerise/de-ridder-den-hertog-php-sdk",
+    "require": {
+        "php": "~8.5",
+        "saloonphp/saloon": "^3.14",
+        "saloonphp/xml-wrangler": "^1.4",
+        "webmozart/assert": "^1.12"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.26.0",
+        "phpstan/phpstan": "^2.1.33",
+        "phpunit/phpunit": "^12.5.1",
+        "spatie/ray": "^1.44",
+        "vlucas/phpdotenv": "^5.6.2"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "DeRidderDenHertog\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DeRidderDenHertog\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "format": "vendor/bin/pint",
+        "stan": "vendor/bin/phpstan analyse --memory-limit=2G",
+        "test": "vendor/bin/phpunit",
+        "verify": ["@stan", "@test"]
+    }
+}
