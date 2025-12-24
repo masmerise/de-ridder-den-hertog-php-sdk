@@ -25,6 +25,10 @@ use DeRidderDenHertog\GetCustomers\Request\GetCustomers;
 use DeRidderDenHertog\GetCustomers\Type\Customer;
 use DeRidderDenHertog\GetCustomers\Type\Mapping\CustomerMapper;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
+use DeRidderDenHertog\GetDayTurnover\Failure\CouldNotGetDayTurnover;
+use DeRidderDenHertog\GetDayTurnover\Request\GetDayTurnover;
+use DeRidderDenHertog\GetDayTurnover\Type\Mapping\MapsTransactions;
+use DeRidderDenHertog\GetDayTurnover\Type\Transaction;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
 use DeRidderDenHertog\SetCustomer\Request\SetCustomer;
 use DeRidderDenHertog\SetCustomer\Type\Parameter\CustomerData;
@@ -107,6 +111,25 @@ final readonly class DeRidderDenHertog
         );
 
         return array_map(new CustomerMapper(), $response->records['TblKlanten'] ?? []);
+    }
+
+    /**
+     * The daily turnover can be retrieved with a FromDate, TillDate as parameter.
+     *
+     * @param Filter|null $filter The SQL filter to apply.
+     * @param Date|null $from The date from which to retrieve transactions.
+     * @param Date|null $till The date until which to retrieve transactions.
+     *
+     * @return Transaction[]
+     */
+    public function getDayTurnover(?Filter $filter = null, ?Date $from = null, ?Date $till = null): array
+    {
+        $response = $this->send(
+            request: new GetDayTurnover($this->guid, $filter, $from, $till),
+            onFailure: CouldNotGetDayTurnover::class,
+        );
+
+        return array_map($this->toTransaction(...), $response->records['Kassabonnen'] ?? []);
     }
 
     /**
