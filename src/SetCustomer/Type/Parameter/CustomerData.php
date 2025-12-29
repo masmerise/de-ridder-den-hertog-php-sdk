@@ -72,7 +72,7 @@ final readonly class CustomerData
 
     public function toMessageArray(): array
     {
-        return array_filter([
+        return [
             'Betaalmethode' => $this->betaalmethode,
             'City' => $this->city,
             'Company' => $this->company,
@@ -92,6 +92,6 @@ final readonly class CustomerData
             'Street' => $this->street,
             'VatNumber' => $this->vatNumber,
             'ZipCode' => $this->zipCode,
-        ]);
+        ];
     }
 }

@@ -5,7 +5,7 @@ namespace DeRidderDenHertog\Core\Http\Soap;
 use JsonException;
 
 /** @internal */
-final readonly class Message
+final readonly class JsonMessage
 {
     /** @throws JsonException */
     public static function decode(string $request): array

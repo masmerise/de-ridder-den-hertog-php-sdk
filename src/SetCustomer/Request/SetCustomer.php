@@ -2,25 +2,20 @@
 
 namespace DeRidderDenHertog\SetCustomer\Request;
 
-use DeRidderDenHertog\Authentication\ApiGuid;
-use DeRidderDenHertog\Core\Http\Soap\Envelope;
 use DeRidderDenHertog\Core\Http\Soap\Request;
 use DeRidderDenHertog\SetCustomer\Type\Parameter\CustomerData;
 
 /** @internal */
 final class SetCustomer extends Request
 {
-    public function __construct(
-        private readonly ApiGuid $guid,
-        private readonly CustomerData $data,
-    ) {}
+    protected string $action = 'SetCustomer';
 
-    protected function defaultBody(): string
+    public function __construct(private readonly CustomerData $data) {}
+
+    protected function message(): array
     {
-        return Envelope::wrap([
-            'APIGuid' => $this->guid->toMessageString(),
-            'Action' => 'SetCustomer',
-            'Customer' => $this->data->toMessageArray(),
-        ]);
+        return [
+            'Customer' => array_filter($this->data->toMessageArray()),
+        ];
     }
 }

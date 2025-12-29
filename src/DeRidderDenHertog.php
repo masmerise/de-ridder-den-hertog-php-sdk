@@ -7,10 +7,10 @@ use DeRidderDenHertog\Authentication\Failure\CouldNotAuthenticate;
 use DeRidderDenHertog\Core\Failure\UnknownException;
 use DeRidderDenHertog\Core\Failure\ValidationException;
 use DeRidderDenHertog\Core\Http\DeRidderDenHertogConnector;
-use DeRidderDenHertog\Core\Http\Soap\Mapping\MapsResponses;
-use DeRidderDenHertog\Core\Http\Soap\Message;
+use DeRidderDenHertog\Core\Http\Soap\Mapping\MapsSoapResponses;
 use DeRidderDenHertog\Core\Http\Soap\Request;
 use DeRidderDenHertog\Core\Http\Soap\Response;
+use DeRidderDenHertog\Core\Http\XmlResponse;
 use DeRidderDenHertog\Core\Type\Parameter\Date;
 use DeRidderDenHertog\Core\Type\Parameter\Filter;
 use DeRidderDenHertog\Core\Type\Primitive\CustomerId;
@@ -34,7 +34,7 @@ final readonly class DeRidderDenHertog
 {
     use MapsApiFunctions;
     use MapsCustomers;
-    use MapsResponses;
+    use MapsSoapResponses;
 
     private DeRidderDenHertogConnector $client;
 
@@ -63,7 +63,7 @@ final readonly class DeRidderDenHertog
     public function deleteCustomer(CustomerId $id): true
     {
         $this->send(
-            request: new DeleteCustomer($this->guid, $id),
+            request: new DeleteCustomer($id)->setGuid($this->guid),
             onFailure: CouldNotDeleteCustomer::class,
         );
 
@@ -83,7 +83,7 @@ final readonly class DeRidderDenHertog
     public function getApiFunctions(): array
     {
         $response = $this->send(
-            request: new GetApiFunctions($this->guid),
+            request: new GetApiFunctions()->setGuid($this->guid),
             onFailure: CouldNotGetApiFunctions::class,
         );
 
@@ -106,7 +106,7 @@ final readonly class DeRidderDenHertog
     public function getCustomers(?Fields $fields = null, ?Filter $filter = null, ?Date $from = null): array
     {
         $response = $this->send(
-            request: new GetCustomers($this->guid, $fields, $filter, $from),
+            request: new GetCustomers($fields, $filter, $from)->setGuid($this->guid),
             onFailure: CouldNotGetCustomers::class,
         );
 
@@ -128,7 +128,7 @@ final readonly class DeRidderDenHertog
     public function setCustomer(CustomerData $data): CustomerId
     {
         $response = $this->send(
-            request: new SetCustomer($this->guid, $data),
+            request: new SetCustomer($data)->setGuid($this->guid),
             onFailure: CouldNotSetCustomer::class,
         );
 
@@ -148,15 +148,10 @@ final readonly class DeRidderDenHertog
     private function send(Request $request, string $onFailure): Response
     {
         try {
-            $response = $this->client->send($request);
-
-            $message = $response->xmlReader()->value('RHDataServiceResult')->sole();
-            $message = Message::decode($message);
+            $response = $this->client->send($request) |> XmlResponse::decode(...) |> $this->toSoapResponse(...);
         } catch (Throwable $ex) {
             throw UnknownException::sorry($ex);
         }
-
-        $response = $this->toResponse($message);
 
         if (CouldNotAuthenticate::isSatisfiedBy($response->answer)) {
             throw CouldNotAuthenticate::becauseTheDatabaseGuidIsNotValid();

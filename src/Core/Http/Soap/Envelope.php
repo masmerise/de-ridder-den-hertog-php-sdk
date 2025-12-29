@@ -13,7 +13,7 @@ final readonly class Envelope
         $root = RootElement::make('soapenv:Envelope')->addNamespace('soapenv', 'https://schemas.xmlsoap.org/soap/envelope');
 
         return XmlWriter::make()->write($root, [
-            'soapenv:Body' => ['paramRequest' => Message::encode($message)],
+            'soapenv:Body' => ['paramRequest' => JsonMessage::encode($message)],
         ]);
     }
 }

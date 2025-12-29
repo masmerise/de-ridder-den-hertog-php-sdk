@@ -5,7 +5,7 @@ namespace DeRidderDenHertog\Core\Http\Soap\Mapping;
 use DeRidderDenHertog\Core\Http\Soap\Response;
 
 /** @internal */
-trait MapsResponses
+trait MapsSoapResponses
 {
     /**
      * @param array{
@@ -15,7 +15,7 @@ trait MapsResponses
      *     Records?: array,
      * } $response
      */
-    private function toResponse(array $response): Response
+    private function toSoapResponse(array $response): Response
     {
         return new Response(
             ok: $response['Status'] === 'Ok',
