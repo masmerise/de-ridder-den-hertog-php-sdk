@@ -2,6 +2,7 @@
 
 namespace DeRidderDenHertog\Core\Http;
 
+use DeRidderDenHertog\Core\Http\Soap\Request as SoapRequest;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
 use Saloon\PaginationPlugin\Paginator;
@@ -10,9 +11,10 @@ abstract class CursorPaginator extends Paginator
 {
     protected ?int $perPageLimit = 100;
 
+    /** @param SoapRequest $request */
     protected function applyPagination(Request $request): Request
     {
-        //        $message =
+
     }
 
     protected function isLastPage(Response $response): bool

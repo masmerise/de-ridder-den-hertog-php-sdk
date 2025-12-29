@@ -125,7 +125,7 @@ final readonly class DeRidderDenHertog
     public function getDayTurnover(?Filter $filter = null, ?Date $from = null, ?Date $till = null): array
     {
         $response = $this->send(
-            request: new GetDayTurnover($this->guid, $filter, $from, $till),
+            request: new GetDayTurnover($filter, $from, $till)->setGuid($this->guid),
             onFailure: CouldNotGetDayTurnover::class,
         );
 
