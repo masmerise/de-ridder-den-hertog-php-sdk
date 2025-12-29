@@ -18,6 +18,7 @@
     "homepage": "https://github.com/masmerise/de-ridder-den-hertog-php-sdk",
     "require": {
         "php": "~8.5",
+        "saloonphp/pagination-plugin": "^2.2",
         "saloonphp/saloon": "^3.14",
         "saloonphp/xml-wrangler": "^1.4",
         "webmozart/assert": "^1.12"
