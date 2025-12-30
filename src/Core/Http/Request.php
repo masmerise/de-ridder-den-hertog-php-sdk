@@ -3,7 +3,7 @@
 namespace DeRidderDenHertog\Core\Http;
 
 use DeRidderDenHertog\Authentication\ApiGuid;
-use DeRidderDenHertog\Core\Http\Mapping\MapsResults;
+use DeRidderDenHertog\Core\Http\Mapping\ResultMapper;
 use DeRidderDenHertog\Core\Http\Soap\UnwrapResponse;
 use DeRidderDenHertog\Core\Http\Soap\WrapRequest;
 use Saloon\Enums\Method;
@@ -15,8 +15,6 @@ use Saloon\Repositories\Body\JsonBodyRepository;
 /** @internal */
 abstract class Request extends RequestBase
 {
-    use MapsResults;
-
     protected string $action = '';
 
     protected JsonBodyRepository $body;
@@ -37,7 +35,7 @@ abstract class Request extends RequestBase
 
     public function createDtoFromResponse(Response $response): Result
     {
-        return $response |> new UnwrapResponse() |> $this->toResult(...);
+        return $response |> new UnwrapResponse() |> new ResultMapper();
     }
 
     public function resolveEndpoint(): string

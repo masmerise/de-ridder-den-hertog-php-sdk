@@ -7,10 +7,8 @@ use DeRidderDenHertog\Authentication\Failure\CouldNotAuthenticate;
 use DeRidderDenHertog\Core\Failure\UnknownException;
 use DeRidderDenHertog\Core\Failure\ValidationException;
 use DeRidderDenHertog\Core\Http\DeRidderDenHertogConnector;
-use DeRidderDenHertog\Core\Http\Soap\Mapping\ResponseMapper;
-use DeRidderDenHertog\Core\Http\Soap\Request;
-use DeRidderDenHertog\Core\Http\Soap\Response;
-use DeRidderDenHertog\Core\Http\XmlResponse;
+use DeRidderDenHertog\Core\Http\Request;
+use DeRidderDenHertog\Core\Http\Result;
 use DeRidderDenHertog\Core\Type\Parameter\Date;
 use DeRidderDenHertog\Core\Type\Parameter\Filter;
 use DeRidderDenHertog\Core\Type\Parameter\PerPage;
@@ -28,7 +26,7 @@ use DeRidderDenHertog\GetCustomers\Type\Mapping\CustomerMapper;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
 use DeRidderDenHertog\GetDayTurnover\Failure\CouldNotGetDayTurnover;
 use DeRidderDenHertog\GetDayTurnover\Request\GetDayTurnover;
-use DeRidderDenHertog\GetDayTurnover\Type\Mapping\MapsTransactions;
+use DeRidderDenHertog\GetDayTurnover\Type\Mapping\TransactionMapper;
 use DeRidderDenHertog\GetDayTurnover\Type\Transaction;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
 use DeRidderDenHertog\SetCustomer\Request\SetCustomer;
@@ -131,7 +129,7 @@ final readonly class DeRidderDenHertog
             onFailure: CouldNotGetDayTurnover::class,
         );
 
-        return array_map($this->toTransaction(...), $response->records['Kassabonnen'] ?? []);
+        return array_map(new TransactionMapper(), $response->records['Kassabonnen'] ?? []);
     }
 
     /**
@@ -156,11 +154,13 @@ final readonly class DeRidderDenHertog
             perPage: $perPage,
         );
 
+        $map = new TransactionMapper();
+
         foreach ($paginator as $result) {
             $transactions = $result->records['Kassabonnen'] ?? [];
 
             foreach ($transactions as $transaction) {
-                yield $this->toTransaction($transaction);
+                yield $map($transaction);
             }
         }
     }
