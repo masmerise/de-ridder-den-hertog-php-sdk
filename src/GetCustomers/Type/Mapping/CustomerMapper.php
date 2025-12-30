@@ -5,7 +5,7 @@ namespace DeRidderDenHertog\GetCustomers\Type\Mapping;
 use DeRidderDenHertog\GetCustomers\Type\Customer;
 
 /** @internal */
-trait MapsCustomers
+final readonly class CustomerMapper
 {
     /**
      * @param array{
@@ -60,7 +60,7 @@ trait MapsCustomers
      *     KlantWilOokUBLBestand?: bool,
      * } $customer
      */
-    private function toCustomer(array $customer): Customer
+    public function __invoke(array $customer): Customer
     {
         return new Customer(
             tblKlantenID: $customer['TblKlantenID'] ?? null,

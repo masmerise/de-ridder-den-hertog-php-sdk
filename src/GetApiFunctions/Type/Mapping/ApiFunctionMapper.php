@@ -5,7 +5,7 @@ namespace DeRidderDenHertog\GetApiFunctions\Type\Mapping;
 use DeRidderDenHertog\GetApiFunctions\Type\ApiFunction;
 
 /** @internal */
-trait MapsApiFunctions
+final readonly class ApiFunctionMapper
 {
     /**
      * @param array{
@@ -15,7 +15,7 @@ trait MapsApiFunctions
      *     JSONExample: string,
      * } $apiFunction
      */
-    private function toApiFunction(array $apiFunction): ApiFunction
+    public function __invoke(array $apiFunction): ApiFunction
     {
         return new ApiFunction(
             description: $apiFunction['Description'],

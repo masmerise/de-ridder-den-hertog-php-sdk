@@ -7,7 +7,7 @@ use DeRidderDenHertog\Authentication\Failure\CouldNotAuthenticate;
 use DeRidderDenHertog\Core\Failure\UnknownException;
 use DeRidderDenHertog\Core\Failure\ValidationException;
 use DeRidderDenHertog\Core\Http\DeRidderDenHertogConnector;
-use DeRidderDenHertog\Core\Http\Soap\Mapping\MapsSoapResponses;
+use DeRidderDenHertog\Core\Http\Soap\Mapping\ResponseMapper;
 use DeRidderDenHertog\Core\Http\Soap\Request;
 use DeRidderDenHertog\Core\Http\Soap\Response;
 use DeRidderDenHertog\Core\Http\XmlResponse;
@@ -19,11 +19,11 @@ use DeRidderDenHertog\DeleteCustomer\Request\DeleteCustomer;
 use DeRidderDenHertog\GetApiFunctions\Failure\CouldNotGetApiFunctions;
 use DeRidderDenHertog\GetApiFunctions\Request\GetApiFunctions;
 use DeRidderDenHertog\GetApiFunctions\Type\ApiFunction;
-use DeRidderDenHertog\GetApiFunctions\Type\Mapping\MapsApiFunctions;
+use DeRidderDenHertog\GetApiFunctions\Type\Mapping\ApiFunctionMapper;
 use DeRidderDenHertog\GetCustomers\Failure\CouldNotGetCustomers;
 use DeRidderDenHertog\GetCustomers\Request\GetCustomers;
 use DeRidderDenHertog\GetCustomers\Type\Customer;
-use DeRidderDenHertog\GetCustomers\Type\Mapping\MapsCustomers;
+use DeRidderDenHertog\GetCustomers\Type\Mapping\CustomerMapper;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
 use DeRidderDenHertog\SetCustomer\Request\SetCustomer;
@@ -32,10 +32,6 @@ use Throwable;
 
 final readonly class DeRidderDenHertog
 {
-    use MapsApiFunctions;
-    use MapsCustomers;
-    use MapsSoapResponses;
-
     private DeRidderDenHertogConnector $client;
 
     private function __construct(private ApiGuid $guid)
@@ -87,7 +83,7 @@ final readonly class DeRidderDenHertog
             onFailure: CouldNotGetApiFunctions::class,
         );
 
-        return array_map($this->toApiFunction(...), $response->records['APIFunctions']);
+        return array_map(new ApiFunctionMapper(), $response->records['APIFunctions']);
     }
 
     /**
@@ -110,7 +106,7 @@ final readonly class DeRidderDenHertog
             onFailure: CouldNotGetCustomers::class,
         );
 
-        return array_map($this->toCustomer(...), $response->records['TblKlanten'] ?? []);
+        return array_map(new CustomerMapper(), $response->records['TblKlanten'] ?? []);
     }
 
     /**
@@ -148,7 +144,7 @@ final readonly class DeRidderDenHertog
     private function send(Request $request, string $onFailure): Response
     {
         try {
-            $response = $this->client->send($request) |> XmlResponse::decode(...) |> $this->toSoapResponse(...);
+            $response = $this->client->send($request) |> XmlResponse::decode(...) |> new ResponseMapper();
         } catch (Throwable $ex) {
             throw UnknownException::sorry($ex);
         }
