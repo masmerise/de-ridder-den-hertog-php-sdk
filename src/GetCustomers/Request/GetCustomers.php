@@ -20,10 +20,10 @@ final class GetCustomers extends Request
 
     protected function message(): array
     {
-        return [
+        return array_filter([
             'Fields' => $this->fields?->toMessageString(),
             'Filter' => $this->filter?->toMessageString(),
             'FromDate' => $this->from?->toMessageString(),
-        ];
+        ]);
     }
 }

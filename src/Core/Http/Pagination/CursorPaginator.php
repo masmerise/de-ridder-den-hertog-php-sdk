@@ -8,7 +8,7 @@ use Saloon\Http\Request;
 use Saloon\Http\Response;
 use Saloon\PaginationPlugin\Paginator;
 
-abstract class CursorPaginator extends Paginator
+final class CursorPaginator extends Paginator
 {
     protected ?int $perPageLimit = 100;
 
@@ -22,6 +22,18 @@ abstract class CursorPaginator extends Paginator
         }
 
         return $request;
+    }
+
+    protected function getPageItems(Response $response, Request $request): array
+    {
+        /** @var Result $result */
+        $result = $response->dto();
+
+        if (! array_key_exists('Kassabonnen', $result->records)) {
+            return [];
+        }
+
+        return $result->records['Kassabonnen'];
     }
 
     protected function getNextCursor(Response $response): int

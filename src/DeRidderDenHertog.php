@@ -13,6 +13,7 @@ use DeRidderDenHertog\Core\Http\Soap\Response;
 use DeRidderDenHertog\Core\Http\XmlResponse;
 use DeRidderDenHertog\Core\Type\Parameter\Date;
 use DeRidderDenHertog\Core\Type\Parameter\Filter;
+use DeRidderDenHertog\Core\Type\Parameter\PerPage;
 use DeRidderDenHertog\Core\Type\Primitive\CustomerId;
 use DeRidderDenHertog\DeleteCustomer\Failure\CouldNotDeleteCustomer;
 use DeRidderDenHertog\DeleteCustomer\Request\DeleteCustomer;
@@ -32,6 +33,7 @@ use DeRidderDenHertog\GetDayTurnover\Type\Transaction;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
 use DeRidderDenHertog\SetCustomer\Request\SetCustomer;
 use DeRidderDenHertog\SetCustomer\Type\Parameter\CustomerData;
+use Saloon\Http\Response;
 use Throwable;
 
 final readonly class DeRidderDenHertog
@@ -133,6 +135,37 @@ final readonly class DeRidderDenHertog
     }
 
     /**
+     * The daily turnover can be retrieved with a FromDate, TillDate as parameter.
+     *
+     * @param PerPage $perPage The number of results per page.
+     * @param Filter|null $filter The SQL filter to apply.
+     * @param Date|null $from The date from which to retrieve transactions.
+     * @param Date|null $till The date until which to retrieve transactions.
+     *
+     * @return Transaction[]
+     */
+    public function getDayTurnoverPaginated(
+        PerPage $perPage,
+        ?Filter $filter = null,
+        ?Date $from = null,
+        ?Date $till = null
+    ): iterable {
+        $paginator = $this->paginate(
+            request: new GetDayTurnover($filter, $from, $till)->setGuid($this->guid),
+            onFailure: CouldNotGetDayTurnover::class,
+            perPage: $perPage,
+        );
+
+        foreach ($paginator as $result) {
+            $transactions = $result->records['Kassabonnen'] ?? [];
+
+            foreach ($transactions as $transaction) {
+                yield $this->toTransaction($transaction);
+            }
+        }
+    }
+
+    /**
      * Add or Change a customer.
      *
      * @param CustomerData $data The data to set.
@@ -158,16 +191,52 @@ final readonly class DeRidderDenHertog
      * @param Request $request
      * @param class-string<ValidationException> $onFailure
      *
+     * @return Result[]
+     *
+     * @throws CouldNotAuthenticate
+     * @throws UnknownException
+     * @throws ValidationException
+     */
+    protected function paginate(Request $request, string $onFailure, PerPage $perPage): iterable
+    {
+        $paginator = $this->client->paginate($request)->setPerPageLimit($perPage->toInteger());
+
+        foreach ($paginator as $response) {
+            yield $this->getResult($response, $onFailure);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param class-string<ValidationException> $onFailure
+     *
      * @return Result
      *
      * @throws CouldNotAuthenticate
      * @throws UnknownException
      * @throws ValidationException
      */
-    private function send(Request $request, string $onFailure): Result
+    protected function send(Request $request, string $onFailure): Result
+    {
+        $response = $this->client->send($request);
+
+        return $this->getResult($response, $onFailure);
+    }
+
+    /**
+     * @param Response $response
+     * @param class-string<ValidationException> $onFailure
+     *
+     * @return Result
+     *
+     * @throws CouldNotAuthenticate
+     * @throws UnknownException
+     * @throws ValidationException
+     */
+    private function getResult(Response $response, string $onFailure): Result
     {
         try {
-            $response = $this->client->send($request) |> XmlResponse::decode(...) |> new ResponseMapper();
+            $result = $response->dto();
         } catch (Throwable $ex) {
             throw UnknownException::sorry($ex);
         }

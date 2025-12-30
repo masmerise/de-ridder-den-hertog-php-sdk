@@ -7,6 +7,7 @@ use DeRidderDenHertog\Authentication\ApiGuid;
 use DeRidderDenHertog\Authentication\Failure\CouldNotAuthenticate;
 use DeRidderDenHertog\Core\Type\Parameter\Date;
 use DeRidderDenHertog\Core\Type\Parameter\Filter;
+use DeRidderDenHertog\Core\Type\Parameter\PerPage;
 use DeRidderDenHertog\Core\Type\Primitive\CustomerId;
 use DeRidderDenHertog\DeRidderDenHertog;
 use DeRidderDenHertog\GetApiFunctions\Type\ApiFunction;
@@ -219,6 +220,24 @@ final class DeRidderDenHertogTest extends TestCase
 
         // Act
         $transactions = $this->renh->getDayTurnover(from: $from, till: $till);
+
+        // Assert
+        $this->assertNotEmpty($transactions);
+        $this->assertInstanceof(Transaction::class, array_first($transactions));
+    }
+
+    #[Group('get-day-turnover')]
+    #[Test]
+    public function get_day_turnover_paginated(): void
+    {
+        // Arrange
+        $from = Date::fromDateTime(new DateTimeImmutable());
+        $till = $from;
+        $perPage = PerPage::count(50);
+
+        // Act
+        $transactions = $this->renh->getDayTurnoverPaginated(perPage: $perPage, from: $from, till: $till);
+        $transactions = iterator_to_array($transactions);
 
         // Assert
         $this->assertNotEmpty($transactions);

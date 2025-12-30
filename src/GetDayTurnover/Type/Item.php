@@ -5,7 +5,7 @@ namespace DeRidderDenHertog\GetDayTurnover\Type;
 final readonly class Item
 {
     public function __construct(
-        public int $count,
+        public float $count,
         public float $gewicht,
         public int $plu,
         public float $price,

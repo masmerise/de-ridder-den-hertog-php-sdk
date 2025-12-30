@@ -54,11 +54,11 @@ abstract class Request extends RequestBase
 
     protected function request(): array
     {
-        return array_filter([
+        return [
             'APIGuid' => $this->guid->toMessageString(),
             'Action' => $this->action,
             ...$this->message(),
-        ]);
+        ];
     }
 
     protected function message(): array
