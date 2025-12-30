@@ -2,7 +2,7 @@
 
 namespace DeRidderDenHertog\SetCustomer\Request;
 
-use DeRidderDenHertog\Core\Http\Soap\Request;
+use DeRidderDenHertog\Core\Http\Request;
 use DeRidderDenHertog\SetCustomer\Type\Parameter\CustomerData;
 
 /** @internal */

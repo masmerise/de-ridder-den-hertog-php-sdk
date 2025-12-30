@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace DeRidderDenHertog\Core\Http\Soap;
+namespace DeRidderDenHertog\Core\Http;
 
 use JsonException;
 

@@ -2,7 +2,7 @@
 
 namespace DeRidderDenHertog\GetApiFunctions\Request;
 
-use DeRidderDenHertog\Core\Http\Soap\Request;
+use DeRidderDenHertog\Core\Http\Request;
 
 /** @internal */
 final class GetApiFunctions extends Request

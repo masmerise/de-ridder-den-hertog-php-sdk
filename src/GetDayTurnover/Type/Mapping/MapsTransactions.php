@@ -86,7 +86,7 @@ trait MapsTransactions
      *         total: float,
      *         VATNumber: string,
      *         DoNotChargeVAT: bool,
-     *         Ordered: array{
+     *         Ordered?: array{
      *             count: int,
      *             gewicht: float,
      *             plu: int,
@@ -106,7 +106,7 @@ trait MapsTransactions
      *             text: string,
      *             actieomzet: string
      *         }[],
-     *         payform: array{
+     *         payform?: array{
      *             amount: float,
      *             payformid: int,
      *             payformname: string

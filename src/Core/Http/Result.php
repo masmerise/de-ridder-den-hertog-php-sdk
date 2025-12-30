@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace DeRidderDenHertog\Core\Http\Soap;
+namespace DeRidderDenHertog\Core\Http;
 
 /** @internal */
-final readonly class Response
+final readonly class Result
 {
     public function __construct(
         public bool $ok,

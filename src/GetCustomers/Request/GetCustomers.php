@@ -2,7 +2,7 @@
 
 namespace DeRidderDenHertog\GetCustomers\Request;
 
-use DeRidderDenHertog\Core\Http\Soap\Request;
+use DeRidderDenHertog\Core\Http\Request;
 use DeRidderDenHertog\Core\Type\Parameter\Date;
 use DeRidderDenHertog\Core\Type\Parameter\Filter;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;

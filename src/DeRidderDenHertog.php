@@ -158,13 +158,13 @@ final readonly class DeRidderDenHertog
      * @param Request $request
      * @param class-string<ValidationException> $onFailure
      *
-     * @return Response
+     * @return Result
      *
      * @throws CouldNotAuthenticate
      * @throws UnknownException
      * @throws ValidationException
      */
-    private function send(Request $request, string $onFailure): Response
+    private function send(Request $request, string $onFailure): Result
     {
         try {
             $response = $this->client->send($request) |> XmlResponse::decode(...) |> new ResponseMapper();
@@ -172,14 +172,14 @@ final readonly class DeRidderDenHertog
             throw UnknownException::sorry($ex);
         }
 
-        if (CouldNotAuthenticate::isSatisfiedBy($response->answer)) {
+        if (CouldNotAuthenticate::isSatisfiedBy($result->answer)) {
             throw CouldNotAuthenticate::becauseTheDatabaseGuidIsNotValid();
         }
 
-        if (! $response->ok) {
-            throw new $onFailure($response->answer);
+        if (! $result->ok) {
+            throw new $onFailure($result->answer);
         }
 
-        return $response;
+        return $result;
     }
 }

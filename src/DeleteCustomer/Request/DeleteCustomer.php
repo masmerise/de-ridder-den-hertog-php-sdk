@@ -2,7 +2,7 @@
 
 namespace DeRidderDenHertog\DeleteCustomer\Request;
 
-use DeRidderDenHertog\Core\Http\Soap\Request;
+use DeRidderDenHertog\Core\Http\Request;
 use DeRidderDenHertog\Core\Type\Primitive\CustomerId;
 
 /** @internal */
