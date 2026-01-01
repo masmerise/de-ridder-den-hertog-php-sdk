@@ -46,6 +46,12 @@ abstract readonly class Collection implements ArrayAccess, Countable, IteratorAg
         return count($this->items);
     }
 
+    /** @return T|null */
+    public function first(): mixed
+    {
+        return array_first($this->items);
+    }
+
     public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->items);

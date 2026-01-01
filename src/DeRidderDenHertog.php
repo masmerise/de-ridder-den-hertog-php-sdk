@@ -17,17 +17,18 @@ use DeRidderDenHertog\DeleteCustomer\Failure\CouldNotDeleteCustomer;
 use DeRidderDenHertog\DeleteCustomer\Request\DeleteCustomer;
 use DeRidderDenHertog\GetApiFunctions\Failure\CouldNotGetApiFunctions;
 use DeRidderDenHertog\GetApiFunctions\Request\GetApiFunctions;
-use DeRidderDenHertog\GetApiFunctions\Type\ApiFunction;
+use DeRidderDenHertog\GetApiFunctions\Type\ApiFunctions;
 use DeRidderDenHertog\GetApiFunctions\Type\Mapping\ApiFunctionMapper;
 use DeRidderDenHertog\GetCustomers\Failure\CouldNotGetCustomers;
 use DeRidderDenHertog\GetCustomers\Request\GetCustomers;
 use DeRidderDenHertog\GetCustomers\Type\Customer;
+use DeRidderDenHertog\GetCustomers\Type\Customers;
 use DeRidderDenHertog\GetCustomers\Type\Mapping\CustomerMapper;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
 use DeRidderDenHertog\GetDayTurnover\Failure\CouldNotGetDayTurnover;
 use DeRidderDenHertog\GetDayTurnover\Request\GetDayTurnover;
 use DeRidderDenHertog\GetDayTurnover\Type\Mapping\TransactionMapper;
-use DeRidderDenHertog\GetDayTurnover\Type\Transaction;
+use DeRidderDenHertog\GetDayTurnover\Type\Transactions;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
 use DeRidderDenHertog\SetCustomer\Request\SetCustomer;
 use DeRidderDenHertog\SetCustomer\Type\Parameter\CustomerData;
@@ -73,21 +74,23 @@ final readonly class DeRidderDenHertog
     /**
      * These are the API functions authorized for this APIGuid, for support send a email to jflietstra@kwik-bit.nl.
      *
-     * @return ApiFunction[]
+     * @return ApiFunctions
      *
      * @throws CouldNotAuthenticate
      * @throws CouldNotGetApiFunctions
      * @throws UnknownException
      * @throws ValidationException
      */
-    public function getApiFunctions(): array
+    public function getApiFunctions(): ApiFunctions
     {
         $result = $this->send(
             request: new GetApiFunctions()->setGuid($this->guid),
             onFailure: CouldNotGetApiFunctions::class,
         );
 
-        return array_map(new ApiFunctionMapper(), $result->records['APIFunctions']);
+        return ApiFunctions::of(
+            array_map(new ApiFunctionMapper(), $result->records['APIFunctions'])
+        );
     }
 
     /**
@@ -96,21 +99,23 @@ final readonly class DeRidderDenHertog
      * @param Filter|null $filter The SQL filter to apply.
      * @param Date|null $from The date from which to retrieve customers.
      *
-     * @return Customer[]
+     * @return Customers
      *
      * @throws CouldNotAuthenticate
      * @throws CouldNotGetCustomers
      * @throws UnknownException
      * @throws ValidationException
      */
-    public function getCustomers(?Fields $fields = null, ?Filter $filter = null, ?Date $from = null): array
+    public function getCustomers(?Fields $fields = null, ?Filter $filter = null, ?Date $from = null): Customers
     {
         $result = $this->send(
             request: new GetCustomers($fields, $filter, $from)->setGuid($this->guid),
             onFailure: CouldNotGetCustomers::class,
         );
 
-        return array_map(new CustomerMapper(), $result->records['TblKlanten'] ?? []);
+        return Customers::of(
+            array_map(new CustomerMapper(), $result->records['TblKlanten'] ?? [])
+        );
     }
 
     /**
@@ -120,21 +125,23 @@ final readonly class DeRidderDenHertog
      * @param Date|null $from The date from which to retrieve transactions.
      * @param Date|null $till The date until which to retrieve transactions.
      *
-     * @return Transaction[]
+     * @return Transactions
      *
      * @throws CouldNotAuthenticate
      * @throws CouldNotGetDayTurnover
      * @throws UnknownException
      * @throws ValidationException
      */
-    public function getDayTurnover(?Filter $filter = null, ?Date $from = null, ?Date $till = null): array
+    public function getDayTurnover(?Filter $filter = null, ?Date $from = null, ?Date $till = null): Transactions
     {
         $result = $this->send(
             request: new GetDayTurnover($filter, $from, $till)->setGuid($this->guid),
             onFailure: CouldNotGetDayTurnover::class,
         );
 
-        return array_map(new TransactionMapper(), $result->records['Kassabonnen'] ?? []);
+        return Transactions::of(
+            array_map(new TransactionMapper(), $result->records['Kassabonnen'] ?? [])
+        );
     }
 
     /**
@@ -145,7 +152,7 @@ final readonly class DeRidderDenHertog
      * @param Date|null $from The date from which to retrieve transactions.
      * @param Date|null $till The date until which to retrieve transactions.
      *
-     * @return Transaction[]
+     * @return iterable<Transactions>
      *
      * @throws CouldNotAuthenticate
      * @throws CouldNotGetDayTurnover
@@ -166,7 +173,9 @@ final readonly class DeRidderDenHertog
         $map = new TransactionMapper();
 
         foreach ($paginator as $result) {
-            yield from array_map($map, $result->records['Kassabonnen'] ?? []);
+            yield Transactions::of(
+                array_map($map, $result->records['Kassabonnen'] ?? [])
+            );
         }
     }
 
@@ -197,7 +206,7 @@ final readonly class DeRidderDenHertog
      * @param class-string<ValidationException> $onFailure
      * @param PerPage $perPage
      *
-     * @return Result[]
+     * @return iterable<Result>
      *
      * @throws CouldNotAuthenticate
      * @throws ValidationException

@@ -15,6 +15,7 @@ use DeRidderDenHertog\GetCustomers\Type\Customer;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Field;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
 use DeRidderDenHertog\GetDayTurnover\Type\Transaction;
+use DeRidderDenHertog\GetDayTurnover\Type\Transactions;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
 use DeRidderDenHertog\SetCustomer\Type\Parameter\CustomerData;
 use Dotenv\Dotenv;
@@ -89,7 +90,7 @@ final class DeRidderDenHertogTest extends TestCase
 
         // Assert
         $this->assertNotEmpty($apiFunctions);
-        $this->assertInstanceof(ApiFunction::class, array_first($apiFunctions));
+        $this->assertInstanceof(ApiFunction::class, $apiFunctions->first());
     }
 
     #[Group('get-customers')]
@@ -101,7 +102,7 @@ final class DeRidderDenHertogTest extends TestCase
 
         // Assert
         $this->assertNotEmpty($customers);
-        $this->assertInstanceof(Customer::class, array_first($customers));
+        $this->assertInstanceof(Customer::class, $customers->first());
     }
 
     #[Group('get-customers')]
@@ -118,7 +119,7 @@ final class DeRidderDenHertogTest extends TestCase
 
         // Assert
         $this->assertNotEmpty($customers);
-        $this->assertInstanceof(Customer::class, $customer = array_first($customers));
+        $this->assertInstanceof(Customer::class, $customer = $customers->first());
         $this->assertNull($customer->tblKlantenID);
         $this->assertNull($customer->klantnummer);
         $this->assertNull($customer->naam1);
@@ -183,7 +184,7 @@ final class DeRidderDenHertogTest extends TestCase
 
         // Assert
         $this->assertCount(1, $customers);
-        $this->assertInstanceof(Customer::class, $customer = array_first($customers));
+        $this->assertInstanceof(Customer::class, $customer = $customers->first());
         $this->assertSame($customerId, $customer->klantnummer);
     }
 
@@ -222,8 +223,8 @@ final class DeRidderDenHertogTest extends TestCase
         $transactions = $this->renh->getDayTurnover(from: $from, till: $till);
 
         // Assert
-        $this->assertNotEmpty($transactions);
-        $this->assertInstanceof(Transaction::class, array_first($transactions));
+        $this->assertInstanceof(Transactions::class, $transactions);
+        $this->assertInstanceof(Transaction::class, $transactions->first());
     }
 
     #[Group('get-day-turnover')]
@@ -241,7 +242,7 @@ final class DeRidderDenHertogTest extends TestCase
 
         // Assert
         $this->assertNotEmpty($transactions);
-        $this->assertInstanceof(Transaction::class, array_first($transactions));
+        $this->assertInstanceof(Transactions::class, array_first($transactions));
     }
 
     #[Group('set-customer')]
