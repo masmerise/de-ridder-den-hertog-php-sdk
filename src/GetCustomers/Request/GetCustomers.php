@@ -2,7 +2,7 @@
 
 namespace DeRidderDenHertog\GetCustomers\Request;
 
-use DeRidderDenHertog\Core\Http\Soap\Request;
+use DeRidderDenHertog\Core\Http\Request;
 use DeRidderDenHertog\Core\Type\Parameter\Date;
 use DeRidderDenHertog\Core\Type\Parameter\Filter;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
@@ -20,10 +20,10 @@ final class GetCustomers extends Request
 
     protected function message(): array
     {
-        return [
+        return array_filter([
             'Fields' => $this->fields?->toMessageString(),
             'Filter' => $this->filter?->toMessageString(),
             'FromDate' => $this->from?->toMessageString(),
-        ];
+        ]);
     }
 }

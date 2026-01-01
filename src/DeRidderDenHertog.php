@@ -7,12 +7,11 @@ use DeRidderDenHertog\Authentication\Failure\CouldNotAuthenticate;
 use DeRidderDenHertog\Core\Failure\UnknownException;
 use DeRidderDenHertog\Core\Failure\ValidationException;
 use DeRidderDenHertog\Core\Http\DeRidderDenHertogConnector;
-use DeRidderDenHertog\Core\Http\Soap\Mapping\ResponseMapper;
-use DeRidderDenHertog\Core\Http\Soap\Request;
-use DeRidderDenHertog\Core\Http\Soap\Response;
-use DeRidderDenHertog\Core\Http\XmlResponse;
+use DeRidderDenHertog\Core\Http\Request;
+use DeRidderDenHertog\Core\Http\Result;
 use DeRidderDenHertog\Core\Type\Parameter\Date;
 use DeRidderDenHertog\Core\Type\Parameter\Filter;
+use DeRidderDenHertog\Core\Type\Parameter\PerPage;
 use DeRidderDenHertog\Core\Type\Primitive\CustomerId;
 use DeRidderDenHertog\DeleteCustomer\Failure\CouldNotDeleteCustomer;
 use DeRidderDenHertog\DeleteCustomer\Request\DeleteCustomer;
@@ -25,9 +24,14 @@ use DeRidderDenHertog\GetCustomers\Request\GetCustomers;
 use DeRidderDenHertog\GetCustomers\Type\Customer;
 use DeRidderDenHertog\GetCustomers\Type\Mapping\CustomerMapper;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
+use DeRidderDenHertog\GetDayTurnover\Failure\CouldNotGetDayTurnover;
+use DeRidderDenHertog\GetDayTurnover\Request\GetDayTurnover;
+use DeRidderDenHertog\GetDayTurnover\Type\Mapping\TransactionMapper;
+use DeRidderDenHertog\GetDayTurnover\Type\Transaction;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
 use DeRidderDenHertog\SetCustomer\Request\SetCustomer;
 use DeRidderDenHertog\SetCustomer\Type\Parameter\CustomerData;
+use Saloon\Http\Response;
 use Throwable;
 
 final readonly class DeRidderDenHertog
@@ -78,12 +82,12 @@ final readonly class DeRidderDenHertog
      */
     public function getApiFunctions(): array
     {
-        $response = $this->send(
+        $result = $this->send(
             request: new GetApiFunctions()->setGuid($this->guid),
             onFailure: CouldNotGetApiFunctions::class,
         );
 
-        return array_map(new ApiFunctionMapper(), $response->records['APIFunctions']);
+        return array_map(new ApiFunctionMapper(), $result->records['APIFunctions']);
     }
 
     /**
@@ -101,12 +105,69 @@ final readonly class DeRidderDenHertog
      */
     public function getCustomers(?Fields $fields = null, ?Filter $filter = null, ?Date $from = null): array
     {
-        $response = $this->send(
+        $result = $this->send(
             request: new GetCustomers($fields, $filter, $from)->setGuid($this->guid),
             onFailure: CouldNotGetCustomers::class,
         );
 
-        return array_map(new CustomerMapper(), $response->records['TblKlanten'] ?? []);
+        return array_map(new CustomerMapper(), $result->records['TblKlanten'] ?? []);
+    }
+
+    /**
+     * The daily turnover can be retrieved with a FromDate, TillDate as parameter.
+     *
+     * @param Filter|null $filter The SQL filter to apply.
+     * @param Date|null $from The date from which to retrieve transactions.
+     * @param Date|null $till The date until which to retrieve transactions.
+     *
+     * @return Transaction[]
+     *
+     * @throws CouldNotAuthenticate
+     * @throws CouldNotGetDayTurnover
+     * @throws UnknownException
+     * @throws ValidationException
+     */
+    public function getDayTurnover(?Filter $filter = null, ?Date $from = null, ?Date $till = null): array
+    {
+        $result = $this->send(
+            request: new GetDayTurnover($filter, $from, $till)->setGuid($this->guid),
+            onFailure: CouldNotGetDayTurnover::class,
+        );
+
+        return array_map(new TransactionMapper(), $result->records['Kassabonnen'] ?? []);
+    }
+
+    /**
+     * The daily turnover can be retrieved with a FromDate, TillDate as parameter.
+     *
+     * @param PerPage $perPage The number of results per page.
+     * @param Filter|null $filter The SQL filter to apply.
+     * @param Date|null $from The date from which to retrieve transactions.
+     * @param Date|null $till The date until which to retrieve transactions.
+     *
+     * @return Transaction[]
+     *
+     * @throws CouldNotAuthenticate
+     * @throws CouldNotGetDayTurnover
+     * @throws ValidationException
+     */
+    public function getDayTurnoverPaginated(
+        PerPage $perPage,
+        ?Filter $filter = null,
+        ?Date $from = null,
+        ?Date $till = null
+    ): iterable {
+        $paginator = $this->paginate(
+            request: new GetDayTurnover($filter, $from, $till)->setGuid($this->guid),
+            onFailure: CouldNotGetDayTurnover::class,
+            perPage: $perPage,
+        );
+
+        $map = new TransactionMapper();
+
+        foreach ($paginator as $result) {
+            yield from array_map($map, $result->records['Kassabonnen'] ?? []);
+        }
     }
 
     /**
@@ -123,40 +184,75 @@ final readonly class DeRidderDenHertog
      */
     public function setCustomer(CustomerData $data): CustomerId
     {
-        $response = $this->send(
+        $result = $this->send(
             request: new SetCustomer($data)->setGuid($this->guid),
             onFailure: CouldNotSetCustomer::class,
         );
 
-        return CustomerId::fromInteger($response->raw['CustomerID']);
+        return CustomerId::fromInteger($result->raw['CustomerID']);
+    }
+
+    /**
+     * @param Request $request
+     * @param class-string<ValidationException> $onFailure
+     * @param PerPage $perPage
+     *
+     * @return Result[]
+     *
+     * @throws CouldNotAuthenticate
+     * @throws ValidationException
+     */
+    protected function paginate(Request $request, string $onFailure, PerPage $perPage): iterable
+    {
+        $paginator = $this->client->paginate($request)->setPerPageLimit($perPage->toInteger());
+
+        foreach ($paginator as $response) {
+            yield $this->getResult($response, $onFailure);
+        }
     }
 
     /**
      * @param Request $request
      * @param class-string<ValidationException> $onFailure
      *
-     * @return Response
+     * @return Result
      *
      * @throws CouldNotAuthenticate
      * @throws UnknownException
      * @throws ValidationException
      */
-    private function send(Request $request, string $onFailure): Response
+    protected function send(Request $request, string $onFailure): Result
     {
         try {
-            $response = $this->client->send($request) |> XmlResponse::decode(...) |> new ResponseMapper();
+            $response = $this->client->send($request);
         } catch (Throwable $ex) {
             throw UnknownException::sorry($ex);
         }
 
-        if (CouldNotAuthenticate::isSatisfiedBy($response->answer)) {
+        return $this->getResult($response, $onFailure);
+    }
+
+    /**
+     * @param Response $response
+     * @param class-string<ValidationException> $onFailure
+     *
+     * @return Result
+     *
+     * @throws CouldNotAuthenticate
+     * @throws ValidationException
+     */
+    private function getResult(Response $response, string $onFailure): Result
+    {
+        $result = $response->dto();
+
+        if (CouldNotAuthenticate::isSatisfiedBy($result->answer)) {
             throw CouldNotAuthenticate::becauseTheDatabaseGuidIsNotValid();
         }
 
-        if (! $response->ok) {
-            throw new $onFailure($response->answer);
+        if (! $result->ok) {
+            throw new $onFailure($result->answer);
         }
 
-        return $response;
+        return $result;
     }
 }

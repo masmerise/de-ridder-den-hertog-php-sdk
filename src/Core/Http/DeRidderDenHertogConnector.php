@@ -2,21 +2,22 @@
 
 namespace DeRidderDenHertog\Core\Http;
 
+use DeRidderDenHertog\Core\Http\Pagination\CursorPaginator;
 use Saloon\Http\Connector;
+use Saloon\Http\Request;
+use Saloon\PaginationPlugin\Contracts\HasPagination;
 
 /** @internal */
-final class DeRidderDenHertogConnector extends Connector
+final class DeRidderDenHertogConnector extends Connector implements HasPagination
 {
+    public function paginate(Request $request): CursorPaginator
+    {
+        return new CursorPaginator($this, $request);
+    }
+
     public function resolveBaseUrl(): string
     {
         return 'https://renh.online/RHAPI_WEB/awws/RHAPI.awws';
-    }
-
-    protected function defaultConfig(): array
-    {
-        return [
-            'timeout' => 30,
-        ];
     }
 
     protected function defaultHeaders(): array
