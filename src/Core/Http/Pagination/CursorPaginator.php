@@ -49,8 +49,8 @@ final class CursorPaginator extends Paginator
         /** @var Result $result */
         $result = $response->dto();
 
-        $lastRecord = $result->raw['Lastrecord'] ?? 0;
+        $nbRecords = $result->raw['NbRecords'] ?? 0;
 
-        return $lastRecord === 0;
+        return $nbRecords < $this->perPageLimit;
     }
 }
