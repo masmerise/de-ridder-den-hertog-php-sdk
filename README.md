@@ -85,6 +85,7 @@ DeRidderDenHertogException
     ├── CouldNotDeleteCustomer
     ├── CouldNotGetApiFunctions
     ├── CouldNotGetCustomers
+    ├── CouldNotGetDayTurnover
     ├── CouldNotSetCustomer
     └── ...
 ```
@@ -110,6 +111,7 @@ The SDK defaults to a 30 second timeout.
 | DeleteCustomer  |
 | GetAPIFunctions |
 | GetCustomers    |
+| GetDayTurnover  |
 | SetCustomer     |
 
 While the SDK is battle-tested and production-ready, only a handful of API interactions have been implemented thus far.
