@@ -82,12 +82,12 @@ final readonly class DeRidderDenHertog
      */
     public function getApiFunctions(): array
     {
-        $response = $this->send(
+        $result = $this->send(
             request: new GetApiFunctions()->setGuid($this->guid),
             onFailure: CouldNotGetApiFunctions::class,
         );
 
-        return array_map(new ApiFunctionMapper(), $response->records['APIFunctions']);
+        return array_map(new ApiFunctionMapper(), $result->records['APIFunctions']);
     }
 
     /**
@@ -105,12 +105,12 @@ final readonly class DeRidderDenHertog
      */
     public function getCustomers(?Fields $fields = null, ?Filter $filter = null, ?Date $from = null): array
     {
-        $response = $this->send(
+        $result = $this->send(
             request: new GetCustomers($fields, $filter, $from)->setGuid($this->guid),
             onFailure: CouldNotGetCustomers::class,
         );
 
-        return array_map(new CustomerMapper(), $response->records['TblKlanten'] ?? []);
+        return array_map(new CustomerMapper(), $result->records['TblKlanten'] ?? []);
     }
 
     /**
@@ -121,15 +121,20 @@ final readonly class DeRidderDenHertog
      * @param Date|null $till The date until which to retrieve transactions.
      *
      * @return Transaction[]
+     *
+     * @throws CouldNotAuthenticate
+     * @throws CouldNotGetDayTurnover
+     * @throws UnknownException
+     * @throws ValidationException
      */
     public function getDayTurnover(?Filter $filter = null, ?Date $from = null, ?Date $till = null): array
     {
-        $response = $this->send(
+        $result = $this->send(
             request: new GetDayTurnover($filter, $from, $till)->setGuid($this->guid),
             onFailure: CouldNotGetDayTurnover::class,
         );
 
-        return array_map(new TransactionMapper(), $response->records['Kassabonnen'] ?? []);
+        return array_map(new TransactionMapper(), $result->records['Kassabonnen'] ?? []);
     }
 
     /**
@@ -141,6 +146,10 @@ final readonly class DeRidderDenHertog
      * @param Date|null $till The date until which to retrieve transactions.
      *
      * @return Transaction[]
+     *
+     * @throws CouldNotAuthenticate
+     * @throws CouldNotGetDayTurnover
+     * @throws ValidationException
      */
     public function getDayTurnoverPaginated(
         PerPage $perPage,
@@ -157,11 +166,7 @@ final readonly class DeRidderDenHertog
         $map = new TransactionMapper();
 
         foreach ($paginator as $result) {
-            $transactions = $result->records['Kassabonnen'] ?? [];
-
-            foreach ($transactions as $transaction) {
-                yield $map($transaction);
-            }
+            yield from array_map($map, $result->records['Kassabonnen'] ?? []);
         }
     }
 
@@ -179,22 +184,22 @@ final readonly class DeRidderDenHertog
      */
     public function setCustomer(CustomerData $data): CustomerId
     {
-        $response = $this->send(
+        $result = $this->send(
             request: new SetCustomer($data)->setGuid($this->guid),
             onFailure: CouldNotSetCustomer::class,
         );
 
-        return CustomerId::fromInteger($response->raw['CustomerID']);
+        return CustomerId::fromInteger($result->raw['CustomerID']);
     }
 
     /**
      * @param Request $request
      * @param class-string<ValidationException> $onFailure
+     * @param PerPage $perPage
      *
      * @return Result[]
      *
      * @throws CouldNotAuthenticate
-     * @throws UnknownException
      * @throws ValidationException
      */
     protected function paginate(Request $request, string $onFailure, PerPage $perPage): iterable
@@ -218,7 +223,11 @@ final readonly class DeRidderDenHertog
      */
     protected function send(Request $request, string $onFailure): Result
     {
-        $response = $this->client->send($request);
+        try {
+            $response = $this->client->send($request);
+        } catch (Throwable $ex) {
+            throw UnknownException::sorry($ex);
+        }
 
         return $this->getResult($response, $onFailure);
     }
@@ -230,16 +239,11 @@ final readonly class DeRidderDenHertog
      * @return Result
      *
      * @throws CouldNotAuthenticate
-     * @throws UnknownException
      * @throws ValidationException
      */
     private function getResult(Response $response, string $onFailure): Result
     {
-        try {
-            $result = $response->dto();
-        } catch (Throwable $ex) {
-            throw UnknownException::sorry($ex);
-        }
+        $result = $response->dto();
 
         if (CouldNotAuthenticate::isSatisfiedBy($result->answer)) {
             throw CouldNotAuthenticate::becauseTheDatabaseGuidIsNotValid();
