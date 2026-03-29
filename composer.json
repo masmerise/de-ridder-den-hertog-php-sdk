@@ -18,17 +18,18 @@
     "homepage": "https://github.com/masmerise/de-ridder-den-hertog-php-sdk",
     "require": {
         "php": "~8.5",
-        "saloonphp/pagination-plugin": "^2.2",
-        "saloonphp/saloon": "^3.14",
-        "saloonphp/xml-wrangler": "^1.4",
-        "webmozart/assert": "^1.12"
+        "ext-simplexml": "*",
+        "ext-xmlwriter": "*",
+        "saloonphp/pagination-plugin": "^2.0",
+        "saloonphp/saloon": "^4.0",
+        "webmozart/assert": "^2.0"
     },
     "require-dev": {
-        "laravel/pint": "^1.26.0",
-        "phpstan/phpstan": "^2.1.33",
-        "phpunit/phpunit": "^12.5.1",
-        "spatie/ray": "^1.44",
-        "vlucas/phpdotenv": "^5.6.2"
+        "laravel/pint": "^1.29.0",
+        "phpstan/phpstan": "^2.1.44",
+        "phpunit/phpunit": "^12.5.14",
+        "spatie/ray": "^1.47",
+        "vlucas/phpdotenv": "^5.6.3"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,

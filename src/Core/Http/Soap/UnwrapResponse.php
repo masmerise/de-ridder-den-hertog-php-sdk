@@ -8,6 +8,6 @@ final readonly class UnwrapResponse
 {
     public function __invoke(Response $response): array
     {
-        return $response->xmlReader() |> Envelope::unwrap(...);
+        return $response->body() |> Envelope::unwrap(...);
     }
 }

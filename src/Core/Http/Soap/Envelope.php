@@ -3,25 +3,22 @@
 namespace DeRidderDenHertog\Core\Http\Soap;
 
 use DeRidderDenHertog\Core\Http\JsonMessage;
-use Saloon\XmlWrangler\Data\RootElement;
-use Saloon\XmlWrangler\XmlReader;
-use Saloon\XmlWrangler\XmlWriter;
+use DeRidderDenHertog\Core\Xml\Reader;
+use DeRidderDenHertog\Core\Xml\Writer;
 
 /** @internal */
 final readonly class Envelope
 {
-    public static function unwrap(XmlReader $xml): array
+    public static function unwrap(string $xml): array
     {
-        $result = $xml->value('RHDataServiceResult')->sole();
+        $result = Reader::fromString($xml)->value('RHDataServiceResult');
 
         return JsonMessage::decode($result);
     }
 
     public static function wrap(array $message): string
     {
-        $root = RootElement::make('soapenv:Envelope')->addNamespace('soapenv', 'https://schemas.xmlsoap.org/soap/envelope');
-
-        return XmlWriter::make()->write($root, [
+        return Writer::write('soapenv:Envelope', ['soapenv' => 'https://schemas.xmlsoap.org/soap/envelope'], [
             'soapenv:Body' => ['paramRequest' => JsonMessage::encode($message)],
         ]);
     }
