@@ -14,6 +14,8 @@ use DeRidderDenHertog\GetApiFunctions\Type\ApiFunction;
 use DeRidderDenHertog\GetCustomers\Type\Customer;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Field;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
+use DeRidderDenHertog\GetDayTurnover\Type\DayTurnoverPage;
+use DeRidderDenHertog\GetDayTurnover\Type\Parameter\Cursor;
 use DeRidderDenHertog\GetDayTurnover\Type\Transaction;
 use DeRidderDenHertog\GetDayTurnover\Type\Transactions;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
@@ -225,6 +227,22 @@ final class DeRidderDenHertogTest extends TestCase
         // Assert
         $this->assertInstanceof(Transactions::class, $transactions);
         $this->assertInstanceof(Transaction::class, $transactions->first());
+    }
+
+    #[Group('get-day-turnover')]
+    #[Test]
+    public function get_day_turnover_page(): void
+    {
+        // Arrange
+        $perPage = PerPage::count(5);
+
+        // Act
+        $page = $this->renh->getDayTurnoverPage($perPage);
+
+        // Assert
+        $this->assertInstanceOf(DayTurnoverPage::class, $page);
+        $this->assertInstanceOf(Transactions::class, $page->transactions);
+        $this->assertInstanceOf(Cursor::class, $page->cursor);
     }
 
     #[Group('get-day-turnover')]
