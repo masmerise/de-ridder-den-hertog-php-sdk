@@ -31,15 +31,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PAG-01 | — | Pending |
-| PAG-02 | — | Pending |
-| PAG-03 | — | Pending |
+| PAG-01 | Phase 1 | Pending |
+| PAG-02 | Phase 1 | Pending |
+| PAG-03 | Phase 1 | Pending |
 
 **Coverage:**
 - v1.0 requirements: 3 total
-- Mapped to phases: 0
-- Unmapped: 3 ⚠️
+- Mapped to phases: 3
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-30*
-*Last updated: 2026-03-30 after initial definition*
+*Last updated: 2026-03-30 after roadmap creation*
