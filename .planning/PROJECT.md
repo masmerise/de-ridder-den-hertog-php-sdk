@@ -36,6 +36,15 @@ Enable PHP applications to interact with the RENH API through a type-safe, well-
 - Modifying the existing `getDayTurnoverPaginated` method — it stays as-is for full iteration use cases
 - Adding single-page fetch for other endpoints — only GetDayTurnover supports pagination currently
 
+## Current Milestone: v1.0 Single-Page Day Turnover Fetch
+
+**Goal:** Add the ability to fetch a single page of day turnover by cursor, complementing the existing full-iteration paginator.
+
+**Target features:**
+- Fetch a single page of day turnover by cursor → returns `DayTurnoverPage`
+- `Cursor` value object for type-safe cursor parameter
+- `DayTurnoverPage` DTO bundling `Transactions` collection and next cursor metadata
+
 ## Context
 
 - The RENH API uses cursor-based pagination via `LastRecord` (sent in request) and `Lastrecord` (returned in response)
@@ -76,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-30 after initialization*
+*Last updated: 2026-03-30 after milestone v1.0 started*
