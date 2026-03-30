@@ -27,7 +27,9 @@ use DeRidderDenHertog\GetCustomers\Type\Mapping\CustomerMapper;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
 use DeRidderDenHertog\GetDayTurnover\Failure\CouldNotGetDayTurnover;
 use DeRidderDenHertog\GetDayTurnover\Request\GetDayTurnover;
+use DeRidderDenHertog\GetDayTurnover\Type\DayTurnoverPage;
 use DeRidderDenHertog\GetDayTurnover\Type\Mapping\TransactionMapper;
+use DeRidderDenHertog\GetDayTurnover\Type\Parameter\Cursor;
 use DeRidderDenHertog\GetDayTurnover\Type\Transactions;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
 use DeRidderDenHertog\SetCustomer\Request\SetCustomer;
@@ -142,6 +144,52 @@ final readonly class DeRidderDenHertog
         return Transactions::of(
             array_map(new TransactionMapper(), $result->records['Kassabonnen'] ?? [])
         );
+    }
+
+    /**
+     * Fetch a single page of daily turnover. Pass null for cursor to start from the beginning.
+     *
+     * @param PerPage $perPage The number of results per page.
+     * @param Cursor|null $cursor The cursor position to resume from, or null for the first page.
+     * @param Filter|null $filter The SQL filter to apply.
+     * @param Date|null $from The date from which to retrieve transactions.
+     * @param Date|null $till The date until which to retrieve transactions.
+     *
+     * @return DayTurnoverPage
+     *
+     * @throws CouldNotAuthenticate
+     * @throws CouldNotGetDayTurnover
+     * @throws UnknownException
+     * @throws ValidationException
+     */
+    public function getDayTurnoverPage(
+        PerPage $perPage,
+        ?Cursor $cursor = null,
+        ?Filter $filter = null,
+        ?Date $from = null,
+        ?Date $till = null,
+    ): DayTurnoverPage {
+        $request = new GetDayTurnover($filter, $from, $till)->setGuid($this->guid);
+        $request->body()->add('RequestCount', $perPage->toInteger());
+
+        if ($cursor !== null) {
+            $request->body()->add('LastRecord', $cursor->toInteger());
+        }
+
+        $result = $this->send(
+            request: $request,
+            onFailure: CouldNotGetDayTurnover::class,
+        );
+
+        $transactions = Transactions::of(
+            array_map(new TransactionMapper(), $result->records['Kassabonnen'] ?? [])
+        );
+
+        $nbRecords = $result->raw['NbRecords'] ?? 0;
+        $hasMore = $nbRecords >= $perPage->toInteger();
+        $nextCursor = Cursor::fromInteger($result->raw['Lastrecord'], $hasMore);
+
+        return DayTurnoverPage::of($transactions, $nextCursor);
     }
 
     /**
