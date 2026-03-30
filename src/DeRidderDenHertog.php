@@ -169,15 +169,10 @@ final readonly class DeRidderDenHertog
         ?Date $from = null,
         ?Date $till = null,
     ): DayTurnoverPage {
-        $request = new GetDayTurnover($filter, $from, $till)->setGuid($this->guid);
-        $request->body()->add('RequestCount', $perPage->toInteger());
-
-        if ($cursor !== null) {
-            $request->body()->add('LastRecord', $cursor->toInteger());
-        }
-
         $result = $this->send(
-            request: $request,
+            request: new GetDayTurnover($filter, $from, $till)
+                ->forPage($perPage, $cursor)
+                ->setGuid($this->guid),
             onFailure: CouldNotGetDayTurnover::class,
         );
 
@@ -185,9 +180,7 @@ final readonly class DeRidderDenHertog
             array_map(new TransactionMapper(), $result->records['Kassabonnen'] ?? [])
         );
 
-        $nbRecords = $result->raw['NbRecords'] ?? 0;
-        $hasMore = $nbRecords >= $perPage->toInteger();
-        $nextCursor = Cursor::fromInteger($result->raw['Lastrecord'], $hasMore);
+        $nextCursor = Cursor::define($result->raw['Lastrecord'], $result->raw['NbRecords'] ?? 0, $perPage);
 
         return DayTurnoverPage::of($transactions, $nextCursor);
     }

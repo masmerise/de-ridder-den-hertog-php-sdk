@@ -2,6 +2,7 @@
 
 namespace DeRidderDenHertog\GetDayTurnover\Type\Parameter;
 
+use DeRidderDenHertog\Core\Type\Parameter\PerPage;
 use Webmozart\Assert\Assert;
 
 final readonly class Cursor
@@ -18,9 +19,9 @@ final readonly class Cursor
         return new self(0, true);
     }
 
-    public static function fromInteger(int $position, bool $hasMore): self
+    public static function define(int $position, int $nbRecords, PerPage $perPage): self
     {
-        return new self($position, $hasMore);
+        return new self($position, $nbRecords >= $perPage->toInteger());
     }
 
     public function toInteger(): int

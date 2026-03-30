@@ -2,6 +2,7 @@
 
 namespace DeRidderDenHertog\Tests\GetDayTurnover;
 
+use DeRidderDenHertog\Core\Type\Parameter\PerPage;
 use DeRidderDenHertog\GetDayTurnover\Type\Parameter\Cursor;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -15,10 +16,8 @@ final class CursorTest extends TestCase
     #[Group('get-day-turnover')]
     public function start_creates_cursor_at_position_zero_with_has_more_true(): void
     {
-        // Arrange & Act
         $cursor = Cursor::start();
 
-        // Assert
         $this->assertInstanceOf(Cursor::class, $cursor);
         $this->assertSame(0, $cursor->toInteger());
         $this->assertTrue($cursor->hasMore());
@@ -26,53 +25,46 @@ final class CursorTest extends TestCase
 
     #[Test]
     #[Group('get-day-turnover')]
-    #[TestWith([0, true])]
-    #[TestWith([1, true])]
-    #[TestWith([42, false])]
-    #[TestWith([100, false])]
-    public function from_integer_with_valid_values(int $position, bool $hasMore): void
+    #[TestWith([0, 10, 10, true])]
+    #[TestWith([5, 10, 10, true])]
+    #[TestWith([42, 5, 10, false])]
+    #[TestWith([100, 0, 10, false])]
+    public function define_with_valid_values(int $position, int $nbRecords, int $perPage, bool $expectedHasMore): void
     {
-        // Arrange & Act
-        $cursor = Cursor::fromInteger($position, $hasMore);
+        $cursor = Cursor::define($position, $nbRecords, PerPage::count($perPage));
 
-        // Assert
         $this->assertInstanceOf(Cursor::class, $cursor);
         $this->assertSame($position, $cursor->toInteger());
-        $this->assertSame($hasMore, $cursor->hasMore());
+        $this->assertSame($expectedHasMore, $cursor->hasMore());
     }
 
     #[Test]
     #[Group('get-day-turnover')]
-    #[TestWith([-1, true])]
-    #[TestWith([-5, false])]
-    public function from_integer_rejects_negative_values(int $position, bool $hasMore): void
+    #[TestWith([-1])]
+    #[TestWith([-5])]
+    public function define_rejects_negative_position(int $position): void
     {
-        // Arrange & Act & Assert
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/cursor position must be >= 0/');
 
-        Cursor::fromInteger($position, $hasMore);
+        Cursor::define($position, 10, PerPage::count(10));
     }
 
     #[Test]
     #[Group('get-day-turnover')]
-    public function has_more_returns_true_when_set(): void
+    public function has_more_when_nb_records_equals_per_page(): void
     {
-        // Arrange
-        $cursor = Cursor::fromInteger(10, true);
+        $cursor = Cursor::define(10, 25, PerPage::count(25));
 
-        // Act & Assert
         $this->assertTrue($cursor->hasMore());
     }
 
     #[Test]
     #[Group('get-day-turnover')]
-    public function has_more_returns_false_when_set(): void
+    public function has_no_more_when_nb_records_less_than_per_page(): void
     {
-        // Arrange
-        $cursor = Cursor::fromInteger(10, false);
+        $cursor = Cursor::define(10, 15, PerPage::count(25));
 
-        // Act & Assert
         $this->assertFalse($cursor->hasMore());
     }
 }
