@@ -10,8 +10,8 @@ Requirements for milestone v1.0. Each maps to roadmap phases.
 ### Pagination
 
 - [x] **PAG-01**: SDK provides a `Cursor` value object that wraps an integer for type-safe cursor parameter handling
-- [ ] **PAG-02**: SDK provides a `DayTurnoverPage` DTO that bundles a `Transactions` collection with an optional next `Cursor`
-- [ ] **PAG-03**: SDK provides a `getDayTurnoverPage` method that fetches a single page of day turnover given a `PerPage` and optional `Cursor`, returning a `DayTurnoverPage`
+- [x] **PAG-02**: SDK provides a `DayTurnoverPage` DTO that bundles a `Transactions` collection with an optional next `Cursor`
+- [x] **PAG-03**: SDK provides a `getDayTurnoverPage` method that fetches a single page of day turnover given a `PerPage` and optional `Cursor`, returning a `DayTurnoverPage`
 
 ## Future Requirements
 
@@ -32,8 +32,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PAG-01 | Phase 1 | Complete |
-| PAG-02 | Phase 1 | Pending |
-| PAG-03 | Phase 1 | Pending |
+| PAG-02 | Phase 1 | Complete |
+| PAG-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1.0 requirements: 3 total
