@@ -241,8 +241,6 @@ final class DeRidderDenHertogTest extends TestCase
         // Act
         $page = $this->renh->getDayTurnoverPage($perPage, from: $from, till: $till);
 
-        dump($page);
-
         // Assert
         $this->assertInstanceOf(DayTurnoverPage::class, $page);
         $this->assertInstanceOf(Transactions::class, $page->transactions);
