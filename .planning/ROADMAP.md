@@ -26,7 +26,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `getDayTurnoverPage(PerPage, ?Cursor, ...)` can be called with `null` cursor to fetch the first page and returns a `DayTurnoverPage`
   4. `getDayTurnoverPage` called with the `nextCursor` from a previous page returns the subsequent page's transactions
   5. All existing tests remain green and `getDayTurnoverPaginated` is unmodified
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Cursor value object with unit tests
+- [ ] 01-02-PLAN.md — DayTurnoverPage DTO, getDayTurnoverPage facade method, integration test
 
 ## Progress
 
@@ -35,4 +39,4 @@ Phases execute in numeric order: 1
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Single-Page Cursor Fetch | 0/? | Not started | - |
+| 1. Single-Page Cursor Fetch | 0/2 | Not started | - |
