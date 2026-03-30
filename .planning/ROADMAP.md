@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Cursor value object with unit tests
+- [x] 01-01-PLAN.md — Cursor value object with unit tests
 - [ ] 01-02-PLAN.md — DayTurnoverPage DTO, getDayTurnoverPage facade method, integration test
 
 ## Progress
