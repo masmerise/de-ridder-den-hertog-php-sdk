@@ -235,9 +235,13 @@ final class DeRidderDenHertogTest extends TestCase
     {
         // Arrange
         $perPage = PerPage::count(5);
+        $from = Date::fromDateTime(new DateTimeImmutable());
+        $till = $from;
 
         // Act
-        $page = $this->renh->getDayTurnoverPage($perPage);
+        $page = $this->renh->getDayTurnoverPage($perPage, from: $from, till: $till);
+
+        dump($page);
 
         // Assert
         $this->assertInstanceOf(DayTurnoverPage::class, $page);
