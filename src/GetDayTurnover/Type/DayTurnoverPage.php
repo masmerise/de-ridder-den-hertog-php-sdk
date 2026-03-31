@@ -2,17 +2,17 @@
 
 namespace DeRidderDenHertog\GetDayTurnover\Type;
 
-use DeRidderDenHertog\GetDayTurnover\Type\Parameter\Cursor;
+use DeRidderDenHertog\GetDayTurnover\Pagination\CursorPaginator;
 
 final readonly class DayTurnoverPage
 {
     private function __construct(
         public Transactions $transactions,
-        public Cursor $cursor,
+        public CursorPaginator $paginator,
     ) {}
 
-    public static function of(Transactions $transactions, Cursor $cursor): self
+    public static function of(Transactions $transactions, CursorPaginator $paginator): self
     {
-        return new self($transactions, $cursor);
+        return new self($transactions, $paginator);
     }
 }

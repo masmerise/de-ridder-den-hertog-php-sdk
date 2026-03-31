@@ -20,7 +20,6 @@
         "php": "~8.5",
         "ext-simplexml": "*",
         "ext-xmlwriter": "*",
-        "saloonphp/pagination-plugin": "^2.0",
         "saloonphp/saloon": "^4.0",
         "webmozart/assert": "^2.0"
     },

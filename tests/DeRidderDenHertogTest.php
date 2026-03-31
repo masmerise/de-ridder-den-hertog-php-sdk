@@ -14,8 +14,9 @@ use DeRidderDenHertog\GetApiFunctions\Type\ApiFunction;
 use DeRidderDenHertog\GetCustomers\Type\Customer;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Field;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
+use DeRidderDenHertog\GetDayTurnover\Pagination\Cursor;
+use DeRidderDenHertog\GetDayTurnover\Pagination\CursorPaginator;
 use DeRidderDenHertog\GetDayTurnover\Type\DayTurnoverPage;
-use DeRidderDenHertog\GetDayTurnover\Type\Parameter\Cursor;
 use DeRidderDenHertog\GetDayTurnover\Type\Transaction;
 use DeRidderDenHertog\GetDayTurnover\Type\Transactions;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
@@ -234,35 +235,22 @@ final class DeRidderDenHertogTest extends TestCase
     public function get_day_turnover_page(): void
     {
         // Arrange
+        $cursor = Cursor::start();
         $perPage = PerPage::count(5);
         $from = Date::fromDateTime(new DateTimeImmutable());
         $till = $from;
 
         // Act
-        $page = $this->renh->getDayTurnoverPage($perPage, from: $from, till: $till);
+        $firstPage = $this->renh->getDayTurnoverPage($perPage, $cursor, null, $from, $till);
+        $secondPage = $this->renh->getDayTurnoverPage($perPage, $firstPage->paginator->cursor, null, $from, $till);
 
         // Assert
-        $this->assertInstanceOf(DayTurnoverPage::class, $page);
-        $this->assertInstanceOf(Transactions::class, $page->transactions);
-        $this->assertInstanceOf(Cursor::class, $page->cursor);
-    }
+        $this->assertInstanceOf(DayTurnoverPage::class, $firstPage);
+        $this->assertInstanceOf(Transactions::class, $firstPage->transactions);
+        $this->assertInstanceOf(CursorPaginator::class, $firstPage->paginator);
 
-    #[Group('get-day-turnover')]
-    #[Test]
-    public function get_day_turnover_paginated(): void
-    {
-        // Arrange
-        $from = Date::fromDateTime(new DateTimeImmutable());
-        $till = $from;
-        $perPage = PerPage::count(50);
-
-        // Act
-        $transactions = $this->renh->getDayTurnoverPaginated(perPage: $perPage, from: $from, till: $till);
-        $transactions = iterator_to_array($transactions);
-
-        // Assert
-        $this->assertNotEmpty($transactions);
-        $this->assertInstanceof(Transactions::class, array_first($transactions));
+        $this->assertNotEquals($firstPage->paginator->cursor, $secondPage->paginator->cursor);
+        $this->assertNotEquals($firstPage->transactions, $secondPage->transactions);
     }
 
     #[Group('set-customer')]

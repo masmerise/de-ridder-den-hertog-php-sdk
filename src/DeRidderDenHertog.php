@@ -26,10 +26,11 @@ use DeRidderDenHertog\GetCustomers\Type\Customers;
 use DeRidderDenHertog\GetCustomers\Type\Mapping\CustomerMapper;
 use DeRidderDenHertog\GetCustomers\Type\Parameter\Fields;
 use DeRidderDenHertog\GetDayTurnover\Failure\CouldNotGetDayTurnover;
+use DeRidderDenHertog\GetDayTurnover\Pagination\Cursor;
+use DeRidderDenHertog\GetDayTurnover\Pagination\CursorPaginator;
 use DeRidderDenHertog\GetDayTurnover\Request\GetDayTurnover;
 use DeRidderDenHertog\GetDayTurnover\Type\DayTurnoverPage;
 use DeRidderDenHertog\GetDayTurnover\Type\Mapping\TransactionMapper;
-use DeRidderDenHertog\GetDayTurnover\Type\Parameter\Cursor;
 use DeRidderDenHertog\GetDayTurnover\Type\Transactions;
 use DeRidderDenHertog\SetCustomer\Failure\CouldNotSetCustomer;
 use DeRidderDenHertog\SetCustomer\Request\SetCustomer;
@@ -147,10 +148,10 @@ final readonly class DeRidderDenHertog
     }
 
     /**
-     * Fetch a single page of daily turnover. Pass null for cursor to start from the beginning.
+     * Fetch a single page of daily turnover.
      *
      * @param PerPage $perPage The number of results per page.
-     * @param Cursor|null $cursor The cursor position to resume from, or null for the first page.
+     * @param Cursor $cursor The cursor position to resume from, or null for the first page.
      * @param Filter|null $filter The SQL filter to apply.
      * @param Date|null $from The date from which to retrieve transactions.
      * @param Date|null $till The date until which to retrieve transactions.
@@ -164,60 +165,26 @@ final readonly class DeRidderDenHertog
      */
     public function getDayTurnoverPage(
         PerPage $perPage,
-        ?Cursor $cursor = null,
+        Cursor $cursor,
         ?Filter $filter = null,
         ?Date $from = null,
         ?Date $till = null,
     ): DayTurnoverPage {
         $result = $this->send(
-            request: new GetDayTurnover($filter, $from, $till)
-                ->forPage($perPage, $cursor)
-                ->setGuid($this->guid),
+            request: new GetDayTurnover($filter, $from, $till)->setGuid($this->guid)->forPage($perPage, $cursor),
             onFailure: CouldNotGetDayTurnover::class,
         );
 
-        $transactions = Transactions::of(
-            array_map(new TransactionMapper(), $result->records['Kassabonnen'] ?? [])
+        return DayTurnoverPage::of(
+            transactions: Transactions::of(
+                array_map(new TransactionMapper(), $result->records['Kassabonnen'] ?? [])
+            ),
+            paginator: CursorPaginator::of(
+                cursor: Cursor::at($result->raw['Lastrecord']),
+                count: $result->raw['NbRecords'] ?? 0,
+                perPage: $perPage,
+            ),
         );
-
-        $nextCursor = Cursor::define($result->raw['Lastrecord'], $result->raw['NbRecords'] ?? 0, $perPage);
-
-        return DayTurnoverPage::of($transactions, $nextCursor);
-    }
-
-    /**
-     * The daily turnover can be retrieved with a FromDate, TillDate as parameter.
-     *
-     * @param PerPage $perPage The number of results per page.
-     * @param Filter|null $filter The SQL filter to apply.
-     * @param Date|null $from The date from which to retrieve transactions.
-     * @param Date|null $till The date until which to retrieve transactions.
-     *
-     * @return iterable<Transactions>
-     *
-     * @throws CouldNotAuthenticate
-     * @throws CouldNotGetDayTurnover
-     * @throws ValidationException
-     */
-    public function getDayTurnoverPaginated(
-        PerPage $perPage,
-        ?Filter $filter = null,
-        ?Date $from = null,
-        ?Date $till = null
-    ): iterable {
-        $paginator = $this->paginate(
-            request: new GetDayTurnover($filter, $from, $till)->setGuid($this->guid),
-            onFailure: CouldNotGetDayTurnover::class,
-            perPage: $perPage,
-        );
-
-        $map = new TransactionMapper();
-
-        foreach ($paginator as $result) {
-            yield Transactions::of(
-                array_map($map, $result->records['Kassabonnen'] ?? [])
-            );
-        }
     }
 
     /**
@@ -240,25 +207,6 @@ final readonly class DeRidderDenHertog
         );
 
         return CustomerId::fromInteger($result->raw['CustomerID']);
-    }
-
-    /**
-     * @param Request $request
-     * @param class-string<ValidationException> $onFailure
-     * @param PerPage $perPage
-     *
-     * @return iterable<Result>
-     *
-     * @throws CouldNotAuthenticate
-     * @throws ValidationException
-     */
-    protected function paginate(Request $request, string $onFailure, PerPage $perPage): iterable
-    {
-        $paginator = $this->client->paginate($request)->setPerPageLimit($perPage->toInteger());
-
-        foreach ($paginator as $response) {
-            yield $this->getResult($response, $onFailure);
-        }
     }
 
     /**

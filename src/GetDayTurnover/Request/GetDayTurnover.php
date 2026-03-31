@@ -6,12 +6,11 @@ use DeRidderDenHertog\Core\Http\Request;
 use DeRidderDenHertog\Core\Type\Parameter\Date;
 use DeRidderDenHertog\Core\Type\Parameter\Filter;
 use DeRidderDenHertog\Core\Type\Parameter\PerPage;
-use DeRidderDenHertog\GetDayTurnover\Type\Parameter\Cursor;
-use Saloon\PaginationPlugin\Contracts\Paginatable;
+use DeRidderDenHertog\GetDayTurnover\Pagination\Cursor;
 use Saloon\Traits\Plugins\HasTimeout;
 
 /** @internal */
-final class GetDayTurnover extends Request implements Paginatable
+final class GetDayTurnover extends Request
 {
     use HasTimeout;
 
@@ -29,7 +28,7 @@ final class GetDayTurnover extends Request implements Paginatable
         private readonly ?Date $till = null,
     ) {}
 
-    public function forPage(PerPage $perPage, ?Cursor $cursor = null): static
+    public function forPage(PerPage $perPage, Cursor $cursor): self
     {
         $this->perPage = $perPage;
         $this->cursor = $cursor;
@@ -47,11 +46,11 @@ final class GetDayTurnover extends Request implements Paginatable
         // Must always be set otherwise the API returns an empty response.
         $message['TillDate'] = $this->till?->toMessageString() ?? '';
 
-        if ($this->perPage !== null) {
+        if ($this->perPage) {
             $message['RequestCount'] = $this->perPage->toInteger();
         }
 
-        if ($this->cursor !== null) {
+        if ($this->cursor?->hasAdvanced()) {
             $message['LastRecord'] = $this->cursor->toInteger();
         }
 
