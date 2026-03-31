@@ -2,6 +2,11 @@
 
 All notable changes to `de-ridder-den-hertog-php-sdk` will be documented in this file.
 
+## 1.1.0 - 2026-03-31
+
+- Removed `getDayTurnoverPaginated`
+- Added `getDayTurnoverPage`
+
 ## 1.0.0 - 2026-03-29
 
 - Stable release
