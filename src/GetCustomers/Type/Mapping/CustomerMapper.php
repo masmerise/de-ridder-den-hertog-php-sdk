@@ -2,6 +2,7 @@
 
 namespace DeRidderDenHertog\GetCustomers\Type\Mapping;
 
+use DeRidderDenHertog\Core\Type\Mapping\CustomerNumber;
 use DeRidderDenHertog\GetCustomers\Type\Customer;
 
 /** @internal */
@@ -10,7 +11,7 @@ final readonly class CustomerMapper
     /**
      * @param array{
      *     TblKlantenID?: int,
-     *     Klantnummer?: int,
+     *     Klantnummer?: int|float,
      *     Naam1?: string,
      *     Naam2?: string,
      *     Naam3?: string,
@@ -64,7 +65,7 @@ final readonly class CustomerMapper
     {
         return new Customer(
             tblKlantenID: $customer['TblKlantenID'] ?? null,
-            klantnummer: $customer['Klantnummer'] ?? null,
+            klantnummer: CustomerNumber::fromMessageValue($customer['Klantnummer'] ?? null),
             naam1: $customer['Naam1'] ?? null,
             naam2: $customer['Naam2'] ?? null,
             naam3: $customer['Naam3'] ?? null,

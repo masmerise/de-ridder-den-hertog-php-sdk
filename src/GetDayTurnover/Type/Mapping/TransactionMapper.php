@@ -4,6 +4,7 @@ namespace DeRidderDenHertog\GetDayTurnover\Type\Mapping;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use DeRidderDenHertog\Core\Type\Mapping\CustomerNumber;
 use DeRidderDenHertog\GetDayTurnover\Type\Item;
 use DeRidderDenHertog\GetDayTurnover\Type\PayForm;
 use DeRidderDenHertog\GetDayTurnover\Type\Transaction;
@@ -18,7 +19,7 @@ final readonly class TransactionMapper
      *         register: int,
      *         billno: string,
      *         cashier: int,
-     *         custno: int,
+     *         custno: int|float,
      *         custname: string,
      *         time: string,
      *         total: float,
@@ -61,7 +62,7 @@ final readonly class TransactionMapper
             register: $transaction['register'],
             billno: $transaction['billno'],
             cashier: $transaction['cashier'],
-            custno: $transaction['custno'] === 0 ? null : $transaction['custno'],
+            custno: CustomerNumber::fromMessageValue($transaction['custno']),
             custname: $transaction['custname'] ?: null,
             time: DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u', $transaction['time'], new DateTimeZone('Europe/Amsterdam')),
             total: $transaction['total'],
