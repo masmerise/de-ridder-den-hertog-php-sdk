@@ -10,7 +10,7 @@ final readonly class JsonMessage
     /** @throws JsonException */
     public static function decode(string $request): array
     {
-        return json_decode(base64_decode($request), true, JSON_THROW_ON_ERROR);
+        return json_decode(base64_decode($request), true, 512, JSON_THROW_ON_ERROR);
     }
 
     public static function encode(array $request): string
