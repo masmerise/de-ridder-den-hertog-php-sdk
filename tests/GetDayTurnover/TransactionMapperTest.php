@@ -96,6 +96,150 @@ final class TransactionMapperTest extends TestCase
     }
 
     /**
+     * RenH types `DoNotChargeVAT` inconsistently: some environments emit a boolean, others the
+     * number `0`/`1` for every single receipt. Under `strict_types=1` the latter used to throw a
+     * TypeError for the whole page, because the throw happens inside the `array_map()` over it.
+     */
+    #[Test]
+    #[Group('get-day-turnover')]
+    public function maps_a_receipt_whose_do_not_charge_vat_flag_arrives_as_a_number(): void
+    {
+        $transaction = (new TransactionMapper())($this->receiptWithLines());
+
+        $this->assertFalse($transaction->doNotChargeVat);
+        $this->assertCount(1, $transaction->ordered);
+        $this->assertFalse($transaction->ordered[0]->gewichtartikel);
+    }
+
+    #[Test]
+    #[Group('get-day-turnover')]
+    #[TestWith(['0', false])]
+    #[TestWith(['1', true])]
+    #[TestWith(['false', false])]
+    #[TestWith(['true', true])]
+    public function maps_the_do_not_charge_vat_flag_whichever_type_it_arrives_as(string $flag, bool $expected): void
+    {
+        $transaction = (new TransactionMapper())($this->receiptWithLines($flag));
+
+        $this->assertSame($expected, $transaction->doNotChargeVat);
+    }
+
+    #[Test]
+    #[Group('get-day-turnover')]
+    #[TestWith(['0', false])]
+    #[TestWith(['1', true])]
+    #[TestWith(['false', false])]
+    #[TestWith(['true', true])]
+    public function maps_the_weighed_article_flag_of_an_item_whichever_type_it_arrives_as(string $flag, bool $expected): void
+    {
+        $transaction = (new TransactionMapper())($this->receiptWithLines('false', $flag));
+
+        $this->assertSame($expected, $transaction->ordered[0]->gewichtartikel);
+    }
+
+    /** An empty receipt carries no `Ordered` and no `payform` key at all, not even an empty one. */
+    #[Test]
+    #[Group('get-day-turnover')]
+    public function maps_a_receipt_that_carries_neither_lines_nor_payforms(): void
+    {
+        $transaction = (new TransactionMapper())($this->receiptWithoutLines());
+
+        $this->assertFalse($transaction->doNotChargeVat);
+        $this->assertSame('0/30', $transaction->billno);
+        $this->assertSame(0.0, $transaction->total);
+        $this->assertSame([], $transaction->ordered);
+        $this->assertSame([], $transaction->payforms);
+    }
+
+    /**
+     * Receipt 0/30 as a live RenH environment returns it: a zero-total receipt with `DoNotChargeVAT`
+     * as the number `0` and neither of the two collection keys present.
+     *
+     * @return array<string, mixed>
+     */
+    private function receiptWithoutLines(): array
+    {
+        $json = <<<'JSON'
+            {
+                "Transaction": {
+                    "branch": 1,
+                    "register": 4,
+                    "billno": "0/30",
+                    "cashier": 1,
+                    "custno": 0,
+                    "custname": "",
+                    "time": "2026-11-17T08:35:12.000",
+                    "total": 0,
+                    "VATNumber": "",
+                    "DoNotChargeVAT": 0
+                }
+            }
+            JSON;
+
+        return JsonMessage::decode(base64_encode($json));
+    }
+
+    /**
+     * Receipt 0/32 as a live RenH environment returns it: `DoNotChargeVAT` arrives as the number
+     * `0` while `gewichtartikel` on the very same record arrives as a genuine boolean.
+     *
+     * @param non-empty-string $doNotChargeVat the JSON literal, so the test exercises the wire type
+     * @param non-empty-string $gewichtartikel the JSON literal, so the test exercises the wire type
+     *
+     * @return array<string, mixed>
+     */
+    private function receiptWithLines(string $doNotChargeVat = '0', string $gewichtartikel = 'false'): array
+    {
+        $json = <<<JSON
+            {
+                "Transaction": {
+                    "branch": 1,
+                    "register": 3,
+                    "billno": "0/32",
+                    "cashier": 3,
+                    "custno": 0,
+                    "custname": "",
+                    "time": "2026-11-18T12:52:46.000",
+                    "total": 0.69,
+                    "VATNumber": "",
+                    "DoNotChargeVAT": {$doNotChargeVat},
+                    "Ordered": [
+                        {
+                            "count": 1,
+                            "gewicht": 0,
+                            "plu": 1,
+                            "price": 0.69,
+                            "brutoverkoopwaarde": 0.69,
+                            "korting": 0,
+                            "verkoopwaarde": 0.69,
+                            "inkoopwaarde": 0.45,
+                            "scancode": "1",
+                            "subgroep": 8,
+                            "tax": 1,
+                            "taxperc": 6,
+                            "hoofdgroep": 0,
+                            "afdeling": 1,
+                            "omzetsoort": 0,
+                            "gewichtartikel": {$gewichtartikel},
+                            "text": "KIWI PIECE",
+                            "actieomzet": "0"
+                        }
+                    ],
+                    "payform": [
+                        {
+                            "amount": 0.7,
+                            "payformid": 17,
+                            "payformname": ""
+                        }
+                    ]
+                }
+            }
+            JSON;
+
+        return JsonMessage::decode(base64_encode($json));
+    }
+
+    /**
      * Receipt 0/184619 as RenH returns it on the wire, decoded through the real transport so the
      * test sees whatever json_decode() actually makes of the customer number literal.
      *

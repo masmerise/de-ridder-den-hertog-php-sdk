@@ -24,7 +24,7 @@ final readonly class TransactionMapper
      *         time: string,
      *         total: float,
      *         VATNumber: string,
-     *         DoNotChargeVAT: bool,
+     *         DoNotChargeVAT: bool|int,
      *         Ordered?: array{
      *             count: int,
      *             gewicht: float,
@@ -41,7 +41,7 @@ final readonly class TransactionMapper
      *             hoofdgroep: int,
      *             afdeling: int,
      *             omzetsoort: int,
-     *             gewichtartikel: bool,
+     *             gewichtartikel: bool|int,
      *             text: string,
      *             actieomzet: string
      *         }[],
@@ -67,7 +67,7 @@ final readonly class TransactionMapper
             time: DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u', $transaction['time'], new DateTimeZone('Europe/Amsterdam')),
             total: $transaction['total'],
             vatNumber: $transaction['VATNumber'] ?: null,
-            doNotChargeVat: $transaction['DoNotChargeVAT'],
+            doNotChargeVat: $this->toBool($transaction['DoNotChargeVAT']),
             ordered: array_map($this->toItem(...), $transaction['Ordered'] ?? []),
             payforms: array_map($this->toPayForm(...), $transaction['payform'] ?? []),
         );
@@ -90,7 +90,7 @@ final readonly class TransactionMapper
      *     hoofdgroep: int,
      *     afdeling: int,
      *     omzetsoort: int,
-     *     gewichtartikel: bool,
+     *     gewichtartikel: bool|int,
      *     text: string,
      *     actieomzet: string
      * } $item
@@ -113,10 +113,20 @@ final readonly class TransactionMapper
             hoofdgroep: $item['hoofdgroep'],
             afdeling: $item['afdeling'],
             omzetsoort: $item['omzetsoort'],
-            gewichtartikel: $item['gewichtartikel'],
+            gewichtartikel: $this->toBool($item['gewichtartikel']),
             text: $item['text'],
             actieomzet: $item['actieomzet'],
         );
+    }
+
+    /**
+     * RenH types its flags inconsistently across environments: one emits a boolean, another the
+     * number `0`/`1` for the very same field. `filter_var()` rather than a cast, because a cast
+     * makes `"0"` and `"false"` truthy.
+     */
+    private function toBool(bool|int|string $value): bool
+    {
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
     }
 
     /**
