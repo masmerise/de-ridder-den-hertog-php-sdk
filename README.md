@@ -43,6 +43,28 @@ $guid = ApiGuid::fromString('{4844a45c-33d1-4937-83f4-366d36449eaf}');
 $renh = DeRidderDenHertog::authenticate($guid);
 ```
 
+### Environments
+
+The SDK targets the production environment by default. You can switch to the test environment when needed:
+
+```php
+$renh = DeRidderDenHertog::authenticate($guid)->useTest();
+```
+
+Both `useTest()` and `useProduction()` are fluent and may be called at any time, affecting every subsequent request:
+
+```php
+$renh->useTest();
+
+$customers = $renh->getCustomers(); // https://test.renh.online
+
+$renh->useProduction();
+
+$customers = $renh->getCustomers(); // https://renh.online
+```
+
+Bear in mind that each environment requires its own API GUID.
+
 ### Data retrieval
 
 ```php

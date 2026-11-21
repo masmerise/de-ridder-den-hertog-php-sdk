@@ -2,14 +2,22 @@
 
 namespace DeRidderDenHertog\Core\Http;
 
+use DeRidderDenHertog\Environments\Environment;
 use Saloon\Http\Connector;
 
 /** @internal */
 final class DeRidderDenHertogConnector extends Connector
 {
+    private Environment $environment = Environment::Production;
+
     public function resolveBaseUrl(): string
     {
-        return 'https://renh.online/RHAPI_WEB/awws/RHAPI.awws';
+        return $this->environment->url();
+    }
+
+    public function useEnvironment(Environment $environment): void
+    {
+        $this->environment = $environment;
     }
 
     protected function defaultHeaders(): array
