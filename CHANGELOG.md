@@ -5,11 +5,8 @@ All notable changes to `de-ridder-den-hertog-php-sdk` will be documented in this
 ## 1.2.0 - 2026-11-21
 
 - Added `useProduction()` and `useTest()` to select the environment, production remains the default
-
-## 1.1.3 - 2026-11-21
-
-- Fixed SOAP faults, which the API answers with a `200`, leaking an uncatchable `RuntimeException`
 - Added `CouldNotCompleteRequest` to report server faults such as the API's own request timeout
+- Fixed SOAP faults, which the API answers with a `200`, leaking an uncatchable `RuntimeException`
 
 ## 1.1.2 - 2026-11-18
 
