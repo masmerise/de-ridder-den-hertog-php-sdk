@@ -214,7 +214,13 @@ final class DeRidderDenHertogTest extends TestCase
         $this->assertEmpty($customers);
     }
 
+    /**
+     * Fetching a whole day unpaginated races the server's own 90 second request budget:
+     * once a day holds enough transactions, the API answers with a timeout fault instead
+     * of a result. Excluded from CI for that reason. Use getDayTurnoverPage() in anger.
+     */
     #[Group('get-day-turnover')]
+    #[Group('slow')]
     #[Test]
     public function get_day_turnover(): void
     {

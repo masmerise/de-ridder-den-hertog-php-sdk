@@ -17,16 +17,29 @@ final readonly class Reader
         return new self(new SimpleXMLElement($xml));
     }
 
+    public function find(string $element): ?string
+    {
+        $results = $this->lookup($element);
+
+        return $results === [] ? null : (string) $results[0];
+    }
+
     public function value(string $element): string
     {
-        $this->xml->registerXPathNamespace('soap', 'https://schemas.xmlsoap.org/soap/envelope');
-
-        $results = $this->xml->xpath("//{$element}");
+        $results = $this->lookup($element);
 
         return match (count($results)) {
             0 => throw new RuntimeException("Element [{$element}] not found in XML."),
             1 => (string) $results[0],
             default => throw new RuntimeException("Expected exactly one [{$element}] element, found " . count($results) . '.'),
         };
+    }
+
+    /** @return list<SimpleXMLElement> */
+    private function lookup(string $element): array
+    {
+        $this->xml->registerXPathNamespace('soap', 'https://schemas.xmlsoap.org/soap/envelope');
+
+        return array_values($this->xml->xpath("//{$element}") ?: []);
     }
 }

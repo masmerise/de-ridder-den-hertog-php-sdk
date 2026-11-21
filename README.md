@@ -80,6 +80,7 @@ The SDK uses exceptions as its medium to communicate failures.
 ```
 DeRidderDenHertogException
 ├── CouldNotAuthenticate (Authentication Errors)
+├── CouldNotCompleteRequest (Server Faults)
 ├── UnknownException (Connection Errors)
 └── ValidationException (Request Errors)
     ├── CouldNotDeleteCustomer
@@ -102,7 +103,24 @@ try {
 
 ## Timeouts
 
-The SDK defaults to a 30 second timeout. 
+The SDK defaults to a 30 second timeout.
+
+The API also enforces a request budget of its own (90 seconds at the time of writing). When a
+request exceeds it, the API answers with a SOAP fault carrying a `200` status, which the SDK
+raises as a `CouldNotCompleteRequest`:
+
+```php
+use DeRidderDenHertog\Core\Failure\CouldNotCompleteRequest;
+
+try {
+    $transactions = $renh->getDayTurnover(from: $from, till: $till);
+} catch (CouldNotCompleteRequest $ex) {
+    $logger->log($ex->fault); // "Request timeout (90 seconds). (22, ERR_TIMEOUT_REQUEST)"
+}
+```
+
+A busy day's turnover will not fit in that budget unpaginated, so reach for `getDayTurnoverPage()`
+whenever the range is not guaranteed to be small. 
 
 ## Implementation progress
 

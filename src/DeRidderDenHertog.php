@@ -4,6 +4,7 @@ namespace DeRidderDenHertog;
 
 use DeRidderDenHertog\Authentication\ApiGuid;
 use DeRidderDenHertog\Authentication\Failure\CouldNotAuthenticate;
+use DeRidderDenHertog\Core\Failure\CouldNotCompleteRequest;
 use DeRidderDenHertog\Core\Failure\UnknownException;
 use DeRidderDenHertog\Core\Failure\ValidationException;
 use DeRidderDenHertog\Core\Http\DeRidderDenHertogConnector;
@@ -60,6 +61,7 @@ final readonly class DeRidderDenHertog
      * @return true
      *
      * @throws CouldNotAuthenticate
+     * @throws CouldNotCompleteRequest
      * @throws CouldNotDeleteCustomer
      * @throws UnknownException
      * @throws ValidationException
@@ -80,6 +82,7 @@ final readonly class DeRidderDenHertog
      * @return ApiFunctions
      *
      * @throws CouldNotAuthenticate
+     * @throws CouldNotCompleteRequest
      * @throws CouldNotGetApiFunctions
      * @throws UnknownException
      * @throws ValidationException
@@ -105,6 +108,7 @@ final readonly class DeRidderDenHertog
      * @return Customers
      *
      * @throws CouldNotAuthenticate
+     * @throws CouldNotCompleteRequest
      * @throws CouldNotGetCustomers
      * @throws UnknownException
      * @throws ValidationException
@@ -131,6 +135,7 @@ final readonly class DeRidderDenHertog
      * @return Transactions
      *
      * @throws CouldNotAuthenticate
+     * @throws CouldNotCompleteRequest
      * @throws CouldNotGetDayTurnover
      * @throws UnknownException
      * @throws ValidationException
@@ -159,6 +164,7 @@ final readonly class DeRidderDenHertog
      * @return DayTurnoverPage
      *
      * @throws CouldNotAuthenticate
+     * @throws CouldNotCompleteRequest
      * @throws CouldNotGetDayTurnover
      * @throws UnknownException
      * @throws ValidationException
@@ -195,6 +201,7 @@ final readonly class DeRidderDenHertog
      * @return CustomerId
      *
      * @throws CouldNotAuthenticate
+     * @throws CouldNotCompleteRequest
      * @throws CouldNotGetCustomers
      * @throws UnknownException
      * @throws ValidationException
@@ -216,6 +223,7 @@ final readonly class DeRidderDenHertog
      * @return Result
      *
      * @throws CouldNotAuthenticate
+     * @throws CouldNotCompleteRequest
      * @throws UnknownException
      * @throws ValidationException
      */
@@ -237,6 +245,7 @@ final readonly class DeRidderDenHertog
      * @return Result
      *
      * @throws CouldNotAuthenticate
+     * @throws CouldNotCompleteRequest
      * @throws ValidationException
      */
     private function getResult(Response $response, string $onFailure): Result
