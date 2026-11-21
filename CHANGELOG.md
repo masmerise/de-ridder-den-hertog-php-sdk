@@ -2,6 +2,11 @@
 
 All notable changes to `de-ridder-den-hertog-php-sdk` will be documented in this file.
 
+## 1.1.3 - 2026-11-21
+
+- Fixed SOAP faults, which the API answers with a `200`, leaking an uncatchable `RuntimeException`
+- Added `CouldNotCompleteRequest` to report server faults such as the API's own request timeout
+
 ## 1.1.2 - 2026-11-18
 
 - Fixed GetDayTurnover failing on a `DoNotChargeVAT` or `gewichtartikel` that RenH sends as a number
