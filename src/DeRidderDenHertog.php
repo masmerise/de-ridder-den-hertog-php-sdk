@@ -16,6 +16,7 @@ use DeRidderDenHertog\Core\Type\Parameter\PerPage;
 use DeRidderDenHertog\Core\Type\Primitive\CustomerId;
 use DeRidderDenHertog\DeleteCustomer\Failure\CouldNotDeleteCustomer;
 use DeRidderDenHertog\DeleteCustomer\Request\DeleteCustomer;
+use DeRidderDenHertog\Environments\Environment;
 use DeRidderDenHertog\GetApiFunctions\Failure\CouldNotGetApiFunctions;
 use DeRidderDenHertog\GetApiFunctions\Request\GetApiFunctions;
 use DeRidderDenHertog\GetApiFunctions\Type\ApiFunctions;
@@ -214,6 +215,30 @@ final readonly class DeRidderDenHertog
         );
 
         return CustomerId::fromInteger($result->raw['CustomerID']);
+    }
+
+    /**
+     * Send subsequent requests to the production environment. This is the default.
+     *
+     * @return self
+     */
+    public function useProduction(): self
+    {
+        $this->client->useEnvironment(Environment::Production);
+
+        return $this;
+    }
+
+    /**
+     * Send subsequent requests to the test environment.
+     *
+     * @return self
+     */
+    public function useTest(): self
+    {
+        $this->client->useEnvironment(Environment::Test);
+
+        return $this;
     }
 
     /**
