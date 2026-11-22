@@ -15,7 +15,7 @@ final class SetCustomer extends Request
     protected function message(): array
     {
         return [
-            'Customer' => array_filter($this->data->toMessageArray()),
+            'Customer' => array_filter($this->data->toMessageArray(), static fn (mixed $value) => $value !== null),
         ];
     }
 }
