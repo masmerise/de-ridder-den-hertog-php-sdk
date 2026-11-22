@@ -2,6 +2,10 @@
 
 All notable changes to `de-ridder-den-hertog-php-sdk` will be documented in this file.
 
+## 1.2.1 - 2026-11-22
+
+- Fixed valid API GUIDs being rejected, any well-formed GUID is now accepted regardless of version or case
+
 ## 1.2.0 - 2026-11-21
 
 - Added `useProduction()` and `useTest()` to select the environment, production remains the default
