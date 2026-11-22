@@ -2,6 +2,10 @@
 
 All notable changes to `de-ridder-den-hertog-php-sdk` will be documented in this file.
 
+## 1.2.2 - 2026-11-22
+
+- Fixed SetCustomer omitting falsy fields such as `Company => 0` or `EmailPakbonnen => ''`, only null fields are omitted now
+
 ## 1.2.1 - 2026-11-22
 
 - Fixed valid API GUIDs being rejected, any well-formed GUID is now accepted regardless of version or case
